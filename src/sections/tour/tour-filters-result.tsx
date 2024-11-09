@@ -45,9 +45,12 @@ export default function TourFiltersResult({
   };
 
   const handleRemoveTourGuide = (inputValue: ITourGuide) => {
-    const newValue = filters.tourGuides.filter((item) => item.name !== inputValue.name);
+    const newValue = filters.tourGuides
+      .filter((item) => item.name !== inputValue.name)
+      .map((item) => item.name); // Extract only the names
     onFilters('tourGuides', newValue);
   };
+  
 
   const handleRemoveDestination = (inputValue: string) => {
     const newValue = filters.destination.filter((item) => item !== inputValue);

@@ -91,7 +91,7 @@ export default function TourFilters({
   );
 
   const handleFilterTourGuide = useCallback(
-    (newValue: ITourGuide[]) => {
+    (newValue: any[]) => {
       onFilters('tourGuides', newValue);
     },
     [onFilters]
