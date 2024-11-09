@@ -11,6 +11,8 @@ import { RouterLink } from 'src/routes/components';
 import { useBoolean } from 'src/hooks/use-boolean';
 
 import { isAfter, isBetween } from 'src/utils/format-time';
+import { useGetVerifiedPosts } from 'src/api/post';
+
 
 import { countries } from 'src/assets/data';
 import { _tours, _tourGuides, TOUR_SORT_OPTIONS, TOUR_SERVICE_OPTIONS } from 'src/_mock';
@@ -20,7 +22,7 @@ import EmptyContent from 'src/components/empty-content';
 import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 
-import { ITourItem, ITourFilters, ITourFilterValue } from 'src/types/tour';
+import {ITourFilters ,AdPost} from 'src/types/tour';
 
 import TourList from '../tour-list';
 import TourSort from '../tour-sort';
@@ -42,12 +44,13 @@ const defaultFilters: ITourFilters = {
 
 export default function TourListView() {
   const settings = useSettingsContext();
-
+  const { verifiedPosts } = useGetVerifiedPosts();
   const openFilters = useBoolean();
 
   const [sortBy, setSortBy] = useState('latest');
 
-  const [search, setSearch] = useState<{ query: string; results: ITourItem[] }>({
+
+  const [search, setSearch] = useState<{ query: string; results:any }>({
     query: '',
     results: [],
   });
@@ -57,11 +60,14 @@ export default function TourListView() {
   const dateError = isAfter(filters.startDate, filters.endDate);
 
   const dataFiltered = applyFilter({
-    inputData: _tours,
+    inputData: verifiedPosts,
     filters,
     sortBy,
     dateError,
   });
+
+  console.log(_tours,'dataFiltereddataFiltered');
+  
 
   const canReset =
     !!filters.destination.length ||
@@ -71,7 +77,7 @@ export default function TourListView() {
 
   const notFound = !dataFiltered.length && canReset;
 
-  const handleFilters = useCallback((name: string, value: ITourFilterValue) => {
+  const handleFilters = useCallback((name: string, value: any) => {
     setFilters((prevState) => ({
       ...prevState,
       [name]: value,
@@ -192,7 +198,7 @@ export default function TourListView() {
       >
         {renderFilters}
 
-        {canReset && renderResults}
+        {/* {canReset && renderResults} */}
       </Stack>
 
       {notFound && <EmptyContent title="No Data" filled sx={{ py: 10 }} />}
@@ -210,7 +216,7 @@ const applyFilter = ({
   sortBy,
   dateError,
 }: {
-  inputData: ITourItem[];
+  inputData: AdPost[];
   filters: ITourFilters;
   sortBy: string;
   dateError: boolean;
@@ -239,12 +245,16 @@ const applyFilter = ({
 
   if (tourGuideIds.length) {
     inputData = inputData.filter((tour) =>
-      tour.tourGuides.some((filterItem) => tourGuideIds.includes(filterItem.id))
+      tour.tourGuides.some((filterItem: { id: string }) => tourGuideIds.includes(filterItem.id))
     );
   }
+  
 
   if (services.length) {
-    inputData = inputData.filter((tour) => tour.services.some((item) => services.includes(item)));
+   inputData = inputData.filter((tour) =>
+  tour.services.some((item: string) => services.includes(item))
+);
+
   }
 
   if (!dateError) {

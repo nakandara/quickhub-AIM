@@ -1,8 +1,7 @@
-import Box from '@mui/material/Box';
+
 import Link from '@mui/material/Link';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
-import MenuItem from '@mui/material/MenuItem';
 import IconButton from '@mui/material/IconButton';
 import ListItemText from '@mui/material/ListItemText';
 
@@ -15,37 +14,38 @@ import { fCurrency } from 'src/utils/format-number';
 import Image from 'src/components/image';
 import Iconify from 'src/components/iconify';
 import { shortDateLabel } from 'src/components/custom-date-range-picker';
-import CustomPopover, { usePopover } from 'src/components/custom-popover';
+import  { usePopover } from 'src/components/custom-popover';
 
-import { ITourItem } from 'src/types/tour';
+import { AdPost } from 'src/types/tour';
+import { Key } from 'react';
 
 // ----------------------------------------------------------------------
 
 type Props = {
-  tour: ITourItem;
+  tour: AdPost;
   onView: VoidFunction;
   onEdit: VoidFunction;
   onDelete: VoidFunction;
 };
 
+
+
 export default function TourItem({ tour, onView, onEdit, onDelete }: Props) {
   const popover = usePopover();
-
+  console.log(tour,'[[[[[[[[[[[[[[');
   const {
     id,
-    name,
-    price,
     images,
-    bookers,
     createdAt,
-    available,
-    priceSale,
-    destination,
-    ratingNumber,
+    model,
+    mileage,
+    fuelType,
+    engineCapacity,
+    
   } = tour;
 
-  const shortLabel = shortDateLabel(available.startDate, available.endDate);
-
+ 
+  
   const renderRating = (
     <Stack
       direction="row"
@@ -61,32 +61,8 @@ export default function TourItem({ tour, onView, onEdit, onDelete }: Props) {
         bgcolor: 'warning.lighter',
       }}
     >
-      <Iconify icon="eva:star-fill" sx={{ color: 'warning.main', mr: 0.25 }} /> {ratingNumber}
-    </Stack>
-  );
-
-  const renderPrice = (
-    <Stack
-      direction="row"
-      alignItems="center"
-      sx={{
-        top: 8,
-        left: 8,
-        zIndex: 9,
-        borderRadius: 1,
-        bgcolor: 'grey.800',
-        position: 'absolute',
-        p: '2px 6px 2px 4px',
-        color: 'common.white',
-        typography: 'subtitle2',
-      }}
-    >
-      {!!priceSale && (
-        <Box component="span" sx={{ color: 'grey.500', mr: 0.25, textDecoration: 'line-through' }}>
-          {fCurrency(priceSale)}
-        </Box>
-      )}
-      {fCurrency(price)}
+      <Iconify icon="eva:star-fill" sx={{ color: 'warning.main', mr: 0.25 }} /> {mileage}
+      
     </Stack>
   );
 
@@ -99,16 +75,28 @@ export default function TourItem({ tour, onView, onEdit, onDelete }: Props) {
       }}
     >
       <Stack flexGrow={1} sx={{ position: 'relative' }}>
-        {renderPrice}
+        {fuelType}
         {renderRating}
-        <Image alt={images[0]} src={images[0]} sx={{ borderRadius: 1, height: 164, width: 1 }} />
+        <Image
+          alt={images[0]?.imageUrl} 
+          src={images[0]?.imageUrl}
+          sx={{ borderRadius: 1, height: 164, width: 1 }}
+        />
       </Stack>
       <Stack spacing={0.5}>
-        <Image alt={images[1]} src={images[1]} ratio="1/1" sx={{ borderRadius: 1, width: 80 }} />
-        <Image alt={images[2]} src={images[2]} ratio="1/1" sx={{ borderRadius: 1, width: 80 }} />
+        {images.slice(1, 3).map((img: { imageUrl: string | undefined; }, index: Key | null | undefined) => (
+          <Image
+            key={index} // Use index as key or better use a unique identifier
+            alt={img.imageUrl} // Access the imageUrl
+            src={img.imageUrl} // Access the imageUrl
+            ratio="1/1"
+            sx={{ borderRadius: 1, width: 80 }}
+          />
+        ))}
       </Stack>
     </Stack>
   );
+  
 
   const renderTexts = (
     <ListItemText
@@ -118,7 +106,7 @@ export default function TourItem({ tour, onView, onEdit, onDelete }: Props) {
       primary={`Posted date: ${fDateTime(createdAt)}`}
       secondary={
         <Link component={RouterLink} href={paths.dashboard.tour.details(id)} color="inherit">
-          {name}
+          {model}
         </Link>
       }
       primaryTypographyProps={{
@@ -149,15 +137,15 @@ export default function TourItem({ tour, onView, onEdit, onDelete }: Props) {
 
       {[
         {
-          label: destination,
+          label: engineCapacity,
           icon: <Iconify icon="mingcute:location-fill" sx={{ color: 'error.main' }} />,
         },
         {
-          label: shortLabel,
+          label: engineCapacity,
           icon: <Iconify icon="solar:clock-circle-bold" sx={{ color: 'info.main' }} />,
         },
         {
-          label: `${bookers.length} Booked`,
+          label: `${images.length} Booked`,
           icon: <Iconify icon="solar:users-group-rounded-bold" sx={{ color: 'primary.main' }} />,
         },
       ].map((item) => (
@@ -174,54 +162,16 @@ export default function TourItem({ tour, onView, onEdit, onDelete }: Props) {
       ))}
     </Stack>
   );
-
   return (
     <>
       <Card>
-        {renderImages}
+      {renderImages} 
+      {renderTexts}
 
-        {renderTexts}
+{renderInfo}
+     </Card>
 
-        {renderInfo}
-      </Card>
 
-      <CustomPopover
-        open={popover.open}
-        onClose={popover.onClose}
-        arrow="right-top"
-        sx={{ width: 140 }}
-      >
-        <MenuItem
-          onClick={() => {
-            popover.onClose();
-            onView();
-          }}
-        >
-          <Iconify icon="solar:eye-bold" />
-          View
-        </MenuItem>
-
-        <MenuItem
-          onClick={() => {
-            popover.onClose();
-            onEdit();
-          }}
-        >
-          <Iconify icon="solar:pen-bold" />
-          Edit
-        </MenuItem>
-
-        <MenuItem
-          onClick={() => {
-            popover.onClose();
-            onDelete();
-          }}
-          sx={{ color: 'error.main' }}
-        >
-          <Iconify icon="solar:trash-bin-trash-bold" />
-          Delete
-        </MenuItem>
-      </CustomPopover>
     </>
   );
 }

@@ -55,7 +55,7 @@ export default function HomeMinimal() {
 
         <m.div variants={varFade().inDown}>
           <Typography variant="h2">
-            What Minimal <br /> helps you?
+           Quick Ads HUb කුමක්ද  <br /> ඔබට උදව් කරනවාද?
           </Typography>
         </m.div>
       </Stack>

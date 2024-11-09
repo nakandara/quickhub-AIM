@@ -204,7 +204,7 @@ export default function HomeHero() {
             repeat: Infinity,
           }}
         >
-          QuickAdsHUb
+          Quick Ads HUb
         </StyledTextGradient>
       </m.div>
 

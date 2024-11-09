@@ -6,18 +6,19 @@ import Pagination, { paginationClasses } from '@mui/material/Pagination';
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
 
-import { ITourItem } from 'src/types/tour';
+import { AdPost } from 'src/types/tour';
 
 import TourItem from './tour-item';
 
 // ----------------------------------------------------------------------
 
 type Props = {
-  tours: ITourItem[];
+  tours: AdPost[];
 };
 
 export default function TourList({ tours }: Props) {
   const router = useRouter();
+
 
   const handleView = useCallback(
     (id: string) => {

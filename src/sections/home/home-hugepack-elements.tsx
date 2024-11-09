@@ -98,8 +98,8 @@ export default function HomeHugePackElements() {
 
       <m.div variants={varFade().inUp}>
         <Typography variant="h2" sx={{ my: 3 }}>
-          Huge pack <br />
-          of elements
+        Book your Add <br />
+        Today
         </Typography>
       </m.div>
 
