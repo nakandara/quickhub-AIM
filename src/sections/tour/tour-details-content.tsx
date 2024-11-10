@@ -1,5 +1,4 @@
 import { m } from 'framer-motion';
-
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
@@ -9,47 +8,38 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import ListItemText from '@mui/material/ListItemText';
 
-import { fDate } from 'src/utils/format-time';
-
-import { TOUR_SERVICE_OPTIONS } from 'src/_mock';
-
 import Image from 'src/components/image';
 import Iconify from 'src/components/iconify';
 import Markdown from 'src/components/markdown';
 import { varTranHover } from 'src/components/animate';
 import Lightbox, { useLightBox } from 'src/components/lightbox';
 
-import { ITourItem } from 'src/types/tour';
-
-// ----------------------------------------------------------------------
-
 type Props = {
-  tour: ITourItem;
+  tour: any; // Replace with the specific type if available
 };
 
 export default function TourDetailsContent({ tour }: Props) {
   const {
-    name,
+    title,
     images,
-    content,
-    services,
-    tourGuides,
-    available,
-    durations,
-    destination,
+    description,
+    brand,
+    model,
+    plane,
+    bodyType,
+    category,
+    city,
+    createdAt,
+    mobileNumber,
+    price,
+    yearOfManufacture,
     ratingNumber,
+    transmission,
   } = tour;
 
-  const slides = images.map((slide) => ({
-    src: slide,
-  }));
-
-  const {
-    selected: selectedImage,
-    open: openLightbox,
-    onOpen: handleOpenLightbox,
-    onClose: handleCloseLightbox,
-  } = useLightBox(slides);
+  const slides = images.map((image:any) => ({ src: image.imageUrl }));
+  
+  const { selected: selectedImage, open: openLightbox, onOpen: handleOpenLightbox, onClose: handleCloseLightbox } = useLightBox(slides);
 
   const renderGallery = (
     <>
@@ -82,7 +72,7 @@ export default function TourDetailsContent({ tour }: Props) {
         </m.div>
 
         <Box gap={1} display="grid" gridTemplateColumns="repeat(2, 1fr)">
-          {slides.slice(1, 5).map((slide) => (
+          {slides.slice(1, 5).map((slide:any) => (
             <m.div
               key={slide.src}
               whileHover="hover"
@@ -115,93 +105,38 @@ export default function TourDetailsContent({ tour }: Props) {
   const renderHead = (
     <>
       <Stack direction="row" sx={{ mb: 3 }}>
-        <Typography variant="h4" sx={{ flexGrow: 1 }}>
-          {name}
-        </Typography>
-
-        <IconButton>
-          <Iconify icon="solar:share-bold" />
-        </IconButton>
-
-        <Checkbox
-          defaultChecked
-          color="error"
-          icon={<Iconify icon="solar:heart-outline" />}
-          checkedIcon={<Iconify icon="solar:heart-bold" />}
-        />
+        <Typography variant="h4" sx={{ flexGrow: 1 }}>{title}</Typography>
+        <IconButton><Iconify icon="solar:share-bold" /></IconButton>
+        <Checkbox defaultChecked color="error" icon={<Iconify icon="solar:heart-outline" />} checkedIcon={<Iconify icon="solar:heart-bold" />} />
       </Stack>
-
-      <Stack spacing={3} direction="row" flexWrap="wrap" alignItems="center">
+      <Stack spacing={3} direction="row" alignItems="center">
         <Stack direction="row" alignItems="center" spacing={0.5} sx={{ typography: 'body2' }}>
           <Iconify icon="eva:star-fill" sx={{ color: 'warning.main' }} />
-          <Box component="span" sx={{ typography: 'subtitle2' }}>
-            {ratingNumber}
-          </Box>
-          <Link sx={{ color: 'text.secondary' }}>(234 reviews)</Link>
+          <Box component="span" sx={{ typography: 'subtitle2' }}>{plane}</Box>
         </Stack>
-
         <Stack direction="row" alignItems="center" spacing={0.5} sx={{ typography: 'body2' }}>
           <Iconify icon="mingcute:location-fill" sx={{ color: 'error.main' }} />
-          {destination}
-        </Stack>
-
-        <Stack direction="row" alignItems="center" spacing={0.5} sx={{ typography: 'subtitle2' }}>
-          <Iconify icon="solar:flag-bold" sx={{ color: 'info.main' }} />
-          <Box component="span" sx={{ typography: 'body2', color: 'text.secondary' }}>
-            Guide by
-          </Box>
-          {tourGuides.map((tourGuide) => tourGuide.name).join(', ')}
+          {city}
         </Stack>
       </Stack>
     </>
   );
 
   const renderOverview = (
-    <Box
-      gap={3}
-      display="grid"
-      gridTemplateColumns={{
-        xs: 'repeat(1, 1fr)',
-        md: 'repeat(2, 1fr)',
-      }}
-    >
+    <Box display="grid" gridTemplateColumns="repeat(2, 1fr)">
       {[
-        {
-          label: 'Available',
-          value: `${fDate(available.startDate)} - ${fDate(available.endDate)}`,
-          icon: <Iconify icon="solar:calendar-date-bold" />,
-        },
-        {
-          label: 'Contact name',
-          value: tourGuides.map((tourGuide) => tourGuide.phoneNumber).join(', '),
-          icon: <Iconify icon="solar:user-rounded-bold" />,
-        },
-        {
-          label: 'Durations',
-          value: durations,
-          icon: <Iconify icon="solar:clock-circle-bold" />,
-        },
-        {
-          label: 'Contact phone',
-          value: tourGuides.map((tourGuide) => tourGuide.name).join(', '),
-          icon: <Iconify icon="solar:phone-bold" />,
-        },
+        { label: 'Price', value: price, icon: <Iconify icon="solar:money-bag-bold" /> },
+        { label: 'Body Type', value: bodyType, icon: <Iconify icon="solar:car-bold" /> },
+        { label: 'Year of Manufacture', value: yearOfManufacture, icon: <Iconify icon="solar:calendar-date-bold" /> },
+        { label: 'Transmission', value: transmission, icon: <Iconify icon="solar:gear-bold" /> },
       ].map((item) => (
         <Stack key={item.label} spacing={1.5} direction="row">
           {item.icon}
           <ListItemText
             primary={item.label}
             secondary={item.value}
-            primaryTypographyProps={{
-              typography: 'body2',
-              color: 'text.secondary',
-              mb: 0.5,
-            }}
-            secondaryTypographyProps={{
-              typography: 'subtitle2',
-              color: 'text.primary',
-              component: 'span',
-            }}
+            primaryTypographyProps={{ typography: 'body2', color: 'text.secondary', mb: 0.5 }}
+            secondaryTypographyProps={{ typography: 'subtitle2', color: 'text.primary', component: 'span' }}
           />
         </Stack>
       ))}
@@ -210,44 +145,10 @@ export default function TourDetailsContent({ tour }: Props) {
 
   const renderContent = (
     <>
-      <Markdown children={content} />
-
+      <Markdown children={description} />
       <Stack spacing={2}>
-        <Typography variant="h6"> Services</Typography>
-
-        <Box
-          rowGap={2}
-          display="grid"
-          gridTemplateColumns={{
-            xs: 'repeat(1, 1fr)',
-            md: 'repeat(2, 1fr)',
-          }}
-        >
-          {TOUR_SERVICE_OPTIONS.map((service) => (
-            <Stack
-              key={service.label}
-              spacing={1}
-              direction="row"
-              alignItems="center"
-              sx={{
-                ...(services.includes(service.label) && {
-                  color: 'text.disabled',
-                }),
-              }}
-            >
-              <Iconify
-                icon="eva:checkmark-circle-2-outline"
-                sx={{
-                  color: 'primary.main',
-                  ...(services.includes(service.label) && {
-                    color: 'text.disabled',
-                  }),
-                }}
-              />
-              {service.label}
-            </Stack>
-          ))}
-        </Box>
+        <Typography variant="h6">Contact Information</Typography>
+        <Box>{mobileNumber}</Box>
       </Stack>
     </>
   );

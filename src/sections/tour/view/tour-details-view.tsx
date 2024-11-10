@@ -5,17 +5,14 @@ import Tabs from '@mui/material/Tabs';
 import Container from '@mui/material/Container';
 
 import { paths } from 'src/routes/paths';
-
-import { _tours, TOUR_DETAILS_TABS, TOUR_PUBLISH_OPTIONS } from 'src/_mock';
-
+import { _tours,TOUR_DETAILS_TABS, TOUR_PUBLISH_OPTIONS } from 'src/_mock';
 import Label from 'src/components/label';
 import { useSettingsContext } from 'src/components/settings';
+import { useGetVerifiedPosts } from 'src/api/post';
 
 import TourDetailsToolbar from '../tour-details-toolbar';
 import TourDetailsContent from '../tour-details-content';
 import TourDetailsBookers from '../tour-details-bookers';
-
-// ----------------------------------------------------------------------
 
 type Props = {
   id: string;
@@ -23,12 +20,46 @@ type Props = {
 
 export default function TourDetailsView({ id }: Props) {
   const settings = useSettingsContext();
+  const { verifiedPosts } = useGetVerifiedPosts();
+  
+  // Use `find` to get the specific tour by `id`
+  const currentTour = verifiedPosts.find((post:any) => post._id === id);
+  console.log(_tours,'...nnnnnm...');
+  const tourData = [
+    {
+      id: "e99f09a7-dd88-49d5-b1c8-1daf80c2d7b1",
 
-  const currentTour = _tours.filter((tour) => tour.id === id)[0];
+ 
+      bookers: [
+        {
+          id: "e99f09a7-dd88-49d5-b1c8-1daf80c2d7b1",
+          name: "Jayvion Simon",
+          guests: 10,
+          avatarUrl: "https://worldadd-api.vercel.app/assets/images/avatar/avatar_1.jpg",
+        },
+        {
+          id: "e99f09a7-dd88-49d5-b1c8-1daf80c2d7b2",
+          name: "Lucian Obrien",
+          guests: 11,
+          avatarUrl: "https://worldadd-api.vercel.app/assets/images/avatar/avatar_2.jpg",
+        },
+        // ...continue adding other bookers similarly
+      ],
+    
+    },
+ 
+  ];
+  
+  
+
+  
 
   const [publish, setPublish] = useState(currentTour?.publish);
-
   const [currentTab, setCurrentTab] = useState('content');
+
+  const currentTourP = tourData.find((tour) => tour.id === 'e99f09a7-dd88-49d5-b1c8-1daf80c2d7b1');
+
+  
 
   const handleChangeTab = useCallback((event: React.SyntheticEvent, newValue: string) => {
     setCurrentTab(newValue);
@@ -54,7 +85,7 @@ export default function TourDetailsView({ id }: Props) {
           label={tab.label}
           icon={
             tab.value === 'bookers' ? (
-              <Label variant="filled">{currentTour?.bookers.length}</Label>
+              <Label variant="filled">{currentTour?.bookers?.length || 0}</Label>
             ) : (
               ''
             )
@@ -68,7 +99,7 @@ export default function TourDetailsView({ id }: Props) {
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
       <TourDetailsToolbar
         backLink={paths.dashboard.tour.root}
-        editLink={paths.dashboard.tour.edit(`${currentTour?.id}`)}
+        editLink={paths.dashboard.tour.edit(`${currentTour?._id}`)}
         liveLink="#"
         publish={publish || ''}
         onChangePublish={handleChangePublish}
@@ -78,7 +109,8 @@ export default function TourDetailsView({ id }: Props) {
 
       {currentTab === 'content' && <TourDetailsContent tour={currentTour} />}
 
-      {currentTab === 'bookers' && <TourDetailsBookers bookers={currentTour?.bookers} />}
+      {currentTab === 'bookers' && <TourDetailsBookers bookers={currentTourP?.bookers || []} />}
+
     </Container>
   );
 }

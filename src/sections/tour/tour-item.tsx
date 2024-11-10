@@ -34,7 +34,7 @@ export default function TourItem({ tour, onView, onEdit, onDelete }: Props) {
   const popover = usePopover();
   console.log(tour,'[[[[[[[[[[[[[[');
   const {
-    id,
+    _id,
     images,
     createdAt,
     model,
@@ -44,6 +44,8 @@ export default function TourItem({ tour, onView, onEdit, onDelete }: Props) {
     
   } = tour;
 
+  console.log(model,'oooooooooo');
+  
  
   
   const renderRating = (
@@ -105,7 +107,7 @@ export default function TourItem({ tour, onView, onEdit, onDelete }: Props) {
       }}
       primary={`Posted date: ${fDateTime(createdAt)}`}
       secondary={
-        <Link component={RouterLink} href={paths.dashboard.tour.details(id)} color="inherit">
+        <Link component={RouterLink} href={paths.dashboard.tour.details(_id)} color="inherit">
           {model}
         </Link>
       }
