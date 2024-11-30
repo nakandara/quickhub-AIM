@@ -164,6 +164,10 @@ export const paths = {
         details: `${ROOTS.DASHBOARD}/order/${MOCK_ID}`,
       },
     },
+    adds: {
+      root: `${ROOTS.DASHBOARD}/adds`,
+    
+    },
     job: {
       root: `${ROOTS.DASHBOARD}/job`,
       new: `${ROOTS.DASHBOARD}/job/new`,
@@ -182,6 +186,17 @@ export const paths = {
       demo: {
         details: `${ROOTS.DASHBOARD}/tour/${MOCK_ID}`,
         edit: `${ROOTS.DASHBOARD}/tour/${MOCK_ID}/edit`,
+      },
+    },
+    posts: {
+      root: `${ROOTS.DASHBOARD}/posts`,
+      new: `${ROOTS.DASHBOARD}/posts/new`,
+      plane: `${ROOTS.DASHBOARD}/posts/plane`,
+      details: (id: string) => `${ROOTS.DASHBOARD}/posts/${id}`,
+      edit: (id: string) => `${ROOTS.DASHBOARD}/posts/${id}/edit`,
+      demo: {
+        details: `${ROOTS.DASHBOARD}/posts/${MOCK_ID}`,
+        edit: `${ROOTS.DASHBOARD}/posts/${MOCK_ID}/edit`,
       },
     },
   },

@@ -33,6 +33,8 @@ import FormProvider, {
 } from 'src/components/hook-form';
 
 import { ITourItem, ITourGuide } from 'src/types/tour';
+import { useMockedUser } from 'src/hooks/use-mocked-user';
+import { createPost } from 'src/api/post';
 
 // ----------------------------------------------------------------------
 
@@ -40,58 +42,98 @@ type Props = {
   currentTour?: ITourItem;
 };
 
-export default function TourNewEditForm({ currentTour }: Props) {
+type FormValues = {
+  title: string;
+  content: string;
+  images: File[];
+  tourGuides: ITourGuide[];
+  tags: string[];
+  durations: string;
+  destination: string;
+  services: string[];
+  available: {
+    startDate: Date | null;
+    endDate: Date | null;
+  };
+};
+
+
+
+export default function TourNewEditForm({ currentTour }: any) {
   const router = useRouter();
+  const { user } = useMockedUser();
+  console.log(user?._id,'pppppppppppppp');
+  
 
   const mdUp = useResponsive('up', 'md');
 
   const { enqueueSnackbar } = useSnackbar();
 
   const NewTourSchema = Yup.object().shape({
-    name: Yup.string().required('Name is required'),
-    content: Yup.string().required('Content is required'),
-    images: Yup.array().min(1, 'Images is required'),
-    //
-    tourGuides: Yup.array().min(1, 'Must have at least 1 guide'),
-    durations: Yup.string().required('Duration is required'),
-    tags: Yup.array().min(2, 'Must have at least 2 tags'),
-    services: Yup.array().min(2, 'Must have at least 2 services'),
+    userId: Yup.string().required('User ID is required'),
+    title: Yup.string().required('Title is required'),
+    bodyType: Yup.string().required('Body Type is required'),
+    price: Yup.string().required('Price is required'),
+    description: Yup.string().required('Description is required'),
+    images: Yup.array().of(Yup.mixed()).min(1, 'Images are required'),
+    fuelType: Yup.array()
+      .of(Yup.string())
+      .min(1, 'Must have at least 1 fuel type')
+      .required('Fuel type is required'),
+    transmission: Yup.array()
+      .of(Yup.string())
+      .min(1, 'Must have at least 1 transmission type')
+      .required('Transmission type is required'),
+    yearOfManufacture: Yup.string().required('Year of Manufacture is required'),
+    engineCapacity: Yup.string().required('Engine Capacity is required'),
+    mileage: Yup.string()
+      .required('Mileage is required')
+      .matches(/^\d+$/, 'Mileage must be a number'), // Ensure it is numeric
+    tags: Yup.array().of(Yup.string()).min(2, 'Must have at least 2 tags'),
+    services: Yup.array().of(Yup.string()).min(2, 'Must have at least 2 services'),
     destination: Yup.string().required('Destination is required'),
     available: Yup.object().shape({
-      startDate: Yup.mixed<any>().nullable().required('Start date is required'),
-      endDate: Yup.mixed<any>()
+      startDate: Yup.date()
+        .nullable()
+        .required('Start date is required'),
+      endDate: Yup.date()
+        .nullable()
         .required('End date is required')
-        .test(
-          'date-min',
-          'End date must be later than start date',
-          (value, { parent }) => value.getTime() > parent.startDate.getTime()
-        ),
+        .min(Yup.ref('startDate'), 'End date must be later than start date'),
     }),
   });
-
+  
+  
   const defaultValues = useMemo(
     () => ({
-      name: currentTour?.name || '',
-      content: currentTour?.content || '',
+      userId: user?._id || '',
+      title: currentTour?.title || '',
+      price: currentTour?.price || '',
+      bodyType: currentTour?.bodyType || '',
+      description: currentTour?.content || '',
       images: currentTour?.images || [],
-      //
-      tourGuides: currentTour?.tourGuides || [],
+      fuelType: currentTour?.fuelType || [],
+      transmission: currentTour?.transmission || [],
       tags: currentTour?.tags || [],
-      durations: currentTour?.durations || '',
+      yearOfManufacture: currentTour?.durations || '',
+      engineCapacity: currentTour?.engineCapacity || '',
+      mileage: currentTour?.mileage || '', // New field
       destination: currentTour?.destination || '',
       services: currentTour?.services || [],
       available: {
-        startDate: currentTour?.available.startDate || null,
-        endDate: currentTour?.available.endDate || null,
+        startDate: currentTour?.available?.startDate || null,
+        endDate: currentTour?.available?.endDate || null,
       },
     }),
-    [currentTour]
+    [currentTour, user]
   );
+  
 
-  const methods = useForm({
+  const methods = useForm<any>({
     resolver: yupResolver(NewTourSchema),
     defaultValues,
   });
+  
 
   const {
     watch,
@@ -111,10 +153,13 @@ export default function TourNewEditForm({ currentTour }: Props) {
   }, [currentTour, defaultValues, reset]);
 
   const onSubmit = handleSubmit(async (data) => {
+    console.log(data,'------------------');
+    
     try {
       await new Promise((resolve) => setTimeout(resolve, 500));
       reset();
       enqueueSnackbar(currentTour ? 'Update success!' : 'Create success!');
+      createPost(data)
       router.push(paths.dashboard.tour.root);
       console.info('DATA', data);
     } catch (error) {
@@ -139,7 +184,7 @@ export default function TourNewEditForm({ currentTour }: Props) {
 
   const handleRemoveFile = useCallback(
     (inputFile: File | string) => {
-      const filtered = values.images && values.images?.filter((file) => file !== inputFile);
+      const filtered = values.images && values.images?.filter((file:any) => file !== inputFile);
       setValue('images', filtered);
     },
     [setValue, values.images]
@@ -167,15 +212,25 @@ export default function TourNewEditForm({ currentTour }: Props) {
           {!mdUp && <CardHeader title="Details" />}
 
           <Stack spacing={3} sx={{ p: 3 }}>
-            <Stack spacing={1.5}>
-              <Typography variant="subtitle2">Name</Typography>
-              <RHFTextField name="name" placeholder="Ex: Adventure Seekers Expedition..." />
-            </Stack>
+          <Stack spacing={1.5}>
+  <Typography variant="subtitle2">Title</Typography>
+  <RHFTextField name="title" placeholder="Ex: Adventure Seekers Expedition..." />
+</Stack>
+<Stack spacing={1.5}>
+  <Typography variant="subtitle2">price</Typography>
+  <RHFTextField name="price" placeholder="Ex: price.." />
+</Stack>
+
+
 
             <Stack spacing={1.5}>
-              <Typography variant="subtitle2">Content</Typography>
-              <RHFEditor simple name="content" />
+              <Typography variant="subtitle2">Description</Typography>
+              <RHFEditor simple name="description" />
             </Stack>
+            <Stack spacing={1.5}>
+  <Typography variant="subtitle2">body Type</Typography>
+  <RHFTextField name="bodyType" placeholder="Ex: bodyType.." />
+</Stack>
 
             <Stack spacing={1.5}>
               <Typography variant="subtitle2">Images</Typography>
@@ -218,40 +273,73 @@ export default function TourNewEditForm({ currentTour }: Props) {
               <Typography variant="subtitle2" sx={{ mb: 1.5 }}>
                 Tour Guide
               </Typography>
+              <Stack>
+  <Typography variant="subtitle2" sx={{ mb: 1.5 }}>
+    Fuel Type
+  </Typography>
 
-              <RHFAutocomplete
-                multiple
-                name="tourGuides"
-                placeholder="+ Tour Guides"
-                disableCloseOnSelect
-                options={_tourGuides}
-                getOptionLabel={(option) => (option as ITourGuide).name}
-                isOptionEqualToValue={(option, value) => option.id === value.id}
-                renderOption={(props, tourGuide) => (
-                  <li {...props} key={tourGuide.id}>
-                    <Avatar
-                      key={tourGuide.id}
-                      alt={tourGuide.avatarUrl}
-                      src={tourGuide.avatarUrl}
-                      sx={{ width: 24, height: 24, flexShrink: 0, mr: 1 }}
-                    />
+  <RHFAutocomplete
+  name="fuelType"
+  multiple={false} // Allow single selection
+  placeholder="Select Fuel Type"
+  options={['Petrol', 'Diesel']}
+  getOptionLabel={(option) => option}
+  isOptionEqualToValue={(option, value) => option === value}
+  onChange={(event, value) => {
+    setValue('fuelType', value ? [value] : [], { shouldValidate: true }); // Convert to array
+  }}
+  renderTags={(selected, getTagProps) =>
+    selected.map((fuelType, index) => (
+      <Chip
+        {...getTagProps({ index })}
+        key={fuelType}
+        size="small"
+        variant="soft"
+        label={fuelType}
+      />
+    ))
+  }
+/>
 
-                    {tourGuide.name}
-                  </li>
-                )}
-                renderTags={(selected, getTagProps) =>
-                  selected.map((tourGuide, index) => (
-                    <Chip
-                      {...getTagProps({ index })}
-                      key={tourGuide.id}
-                      size="small"
-                      variant="soft"
-                      label={tourGuide.name}
-                      avatar={<Avatar alt={tourGuide.name} src={tourGuide.avatarUrl} />}
-                    />
-                  ))
-                }
-              />
+
+</Stack>
+
+
+            </Stack>
+            <Stack>
+             
+              <Stack>
+  <Typography variant="subtitle2" sx={{ mb: 1.5 }}>
+  transmission
+  </Typography>
+
+  <RHFAutocomplete
+  name="transmission"
+  multiple={false} // Allow single selection
+  placeholder="Select transmission Type"
+  options={['Manual', 'Automatic','Semi-Automatic']}
+  getOptionLabel={(option) => option}
+  isOptionEqualToValue={(option, value) => option === value}
+  onChange={(event, value) => {
+    setValue('transmission', value ? [value] : [], { shouldValidate: true }); // Convert to array
+  }}
+  renderTags={(selected, getTagProps) =>
+    selected.map((transmission, index) => (
+      <Chip
+        {...getTagProps({ index })}
+        key={transmission}
+        size="small"
+        variant="soft"
+        label={transmission}
+      />
+    ))
+  }
+/>
+
+
+</Stack>
+
+
             </Stack>
 
             <Stack spacing={1.5}>
@@ -295,9 +383,17 @@ export default function TourNewEditForm({ currentTour }: Props) {
             </Stack>
 
             <Stack spacing={1.5}>
-              <Typography variant="subtitle2">Duration</Typography>
-              <RHFTextField name="durations" placeholder="Ex: 2 days, 4 days 3 nights..." />
+              <Typography variant="subtitle2">year of Manufacture</Typography>
+              <RHFTextField name="yearOfManufacture" placeholder="Ex: yearOfManufacture..." />
             </Stack>
+            <Stack spacing={1.5}>
+              <Typography variant="subtitle2">Engine Capacity</Typography>
+              <RHFTextField name="engineCapacity" placeholder="Ex: 2500CC..." />
+            </Stack>
+            <Stack spacing={1.5}>
+  <Typography variant="subtitle2">Mileage</Typography>
+  <RHFTextField name="mileage" placeholder="Ex: 50000" />
+</Stack>
 
             <Stack spacing={1.5}>
               <Typography variant="subtitle2">Destination</Typography>

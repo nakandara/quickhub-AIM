@@ -62,6 +62,12 @@ const PermissionDeniedPage = lazy(() => import('src/pages/dashboard/permission')
 // BLANK PAGE
 const BlankPage = lazy(() => import('src/pages/dashboard/blank'));
 
+// Create Ads
+
+const CreateAddsPage = lazy(() => import('src/pages/dashboard/create-adds'));
+const SelectPlanePage = lazy(() => import('src/pages/dashboard/select-plane'));
+
+
 // ----------------------------------------------------------------------
 
 export const dashboardRoutes = [
@@ -114,6 +120,13 @@ export const dashboardRoutes = [
         ],
       },
       {
+        path: 'adds',
+        children: [
+          { element: <CreateAddsPage />, index: true },
+         
+        ],
+      },
+      {
         path: 'invoice',
         children: [
           { element: <InvoiceListPage />, index: true },
@@ -150,6 +163,17 @@ export const dashboardRoutes = [
           { path: 'list', element: <TourListPage /> },
           { path: ':id', element: <TourDetailsPage /> },
           { path: 'new', element: <TourCreatePage /> },
+          { path: ':id/edit', element: <TourEditPage /> },
+        ],
+      },
+      {
+        path: 'posts',
+        children: [
+          { element: <TourListPage />, index: true },
+          { path: 'list', element: <TourListPage /> },
+          { path: ':id', element: <TourDetailsPage /> },
+          { path: 'new', element: <TourCreatePage /> },
+          { path: 'plane', element: <SelectPlanePage /> },
           { path: ':id/edit', element: <TourEditPage /> },
         ],
       },

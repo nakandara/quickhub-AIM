@@ -67,6 +67,8 @@ export default function TourListView() {
   });
 
   console.log(_tours,'dataFiltereddataFiltered');
+  console.log(verifiedPosts,'===============');
+  
   
 
   const canReset =
@@ -98,19 +100,19 @@ export default function TourListView() {
         ...prevState,
         query: inputValue,
       }));
-
+  
       if (inputValue) {
-        const results = _tours.filter(
-          (tour) => tour.name.toLowerCase().indexOf(search.query.toLowerCase()) !== -1
+        const results = verifiedPosts.filter((tour: any) =>
+          tour.model.toLowerCase().includes(inputValue.toLowerCase())
         );
-
+  
         setSearch((prevState) => ({
           ...prevState,
           results,
         }));
       }
     },
-    [search.query]
+    [verifiedPosts]
   );
 
   const renderFilters = (

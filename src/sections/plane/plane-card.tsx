@@ -24,11 +24,11 @@ type Props = {
   user: IUserCard;
 };
 
-export default function UserCard({ user }: Props) {
+export default function PlaneCard({ user }: Props) {
   const theme = useTheme();
 
   const { name, coverUrl, role, totalFollowers, totalPosts, avatarUrl, totalFollowing } = user;
-  console.log(coverUrl,'oo');
+
   
 
   return (

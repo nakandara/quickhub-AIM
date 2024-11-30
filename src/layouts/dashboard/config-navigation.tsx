@@ -97,7 +97,7 @@ export function useNavData() {
         items: [
           // USER
           {
-            title: t('user'),
+            title: t('My Account'),
             path: paths.dashboard.user.root,
             icon: ICONS.user,
             children: [
@@ -182,7 +182,7 @@ export function useNavData() {
           // TOUR
           {
             title: t('post'),
-            path: paths.dashboard.tour.root,
+            path: paths.dashboard.posts.root,
             icon: ICONS.tour,
             // children: [
             //  // { title: t('list'), path: paths.dashboard.tour.root },

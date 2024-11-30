@@ -1,7 +1,7 @@
 import useSWR from 'swr';
 import { useMemo } from 'react';
 
-import { fetcher, endpoints } from 'src/utils/axios';
+import axios, { fetcher, endpoints } from 'src/utils/axios';
 
 import { IPostItem } from 'src/types/blog';
 
@@ -43,3 +43,41 @@ export function useGetLatestPosts(title: string) {
   
     return memoizedValue;
   }
+
+  export async function createPost(postData: Record<string, any>) {
+    const URL = 'http://localhost:8080/api/createPost'; 
+    const formData = new FormData();
+  
+    // Iterate over postData entries
+    Object.entries(postData).forEach(([key, value]) => {
+      if (key === "images") {
+        // Append multiple images under the field name 'image'
+        (value as Array<string | Blob>).forEach((url) => formData.append("image", url));
+      } else {
+        formData.append(key, value);
+      }
+    });
+  
+    try {
+      const response = await axios.post(URL, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+  
+      // Return response as expected
+      return {
+        success: true,
+        data: response.data,
+      };
+    } catch (error) {
+      console.error("Error creating post:", error);
+  
+      // Return error with detailed message
+      return {
+        success: false,
+        error: error.response?.data?.message || error.message,
+      };
+    }
+  }
+  

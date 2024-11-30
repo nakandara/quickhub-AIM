@@ -6,8 +6,9 @@ import { _tours } from 'src/_mock';
 
 import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
-
+import { useGetVerifiedPosts } from 'src/api/post';
 import TourNewEditForm from '../tour-new-edit-form';
+
 
 // ----------------------------------------------------------------------
 
@@ -17,6 +18,7 @@ type Props = {
 
 export default function TourEditView({ id }: Props) {
   const settings = useSettingsContext();
+  const { verifiedPosts } = useGetVerifiedPosts();
 
   const currentTour = _tours.find((tour) => tour.id === id);
 
@@ -40,7 +42,7 @@ export default function TourEditView({ id }: Props) {
         }}
       />
 
-      <TourNewEditForm currentTour={currentTour} />
+      <TourNewEditForm currentTour={verifiedPosts} />
     </Container>
   );
 }
