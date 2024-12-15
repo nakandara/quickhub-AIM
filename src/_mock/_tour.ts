@@ -43,6 +43,13 @@ export const TOUR_SERVICE_OPTIONS = [
   },
 ];
 
+export const CONDITION = [
+  { value: 'New', label: 'New' },
+  { value: 'Used', label: 'Used' },
+  { value: 'Recondition', label: 'Recondition' },
+  
+];
+
 const CONTENT = `
 <h6>Description</h6>
 <br/>

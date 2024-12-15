@@ -66,6 +66,7 @@ const BlankPage = lazy(() => import('src/pages/dashboard/blank'));
 
 const CreateAddsPage = lazy(() => import('src/pages/dashboard/create-adds'));
 const SelectPlanePage = lazy(() => import('src/pages/dashboard/select-plane'));
+const SelectCategoryPage = lazy(() => import('src/pages/dashboard/select-category'));
 
 
 // ----------------------------------------------------------------------
@@ -172,11 +173,16 @@ export const dashboardRoutes = [
           { element: <TourListPage />, index: true },
           { path: 'list', element: <TourListPage /> },
           { path: ':id', element: <TourDetailsPage /> },
-          { path: 'new', element: <TourCreatePage /> },
-          { path: 'plane', element: <SelectPlanePage /> },
+          { 
+            path: 'new/:lastSegment/:vehicle/:location/:subLocation', 
+            element: <TourCreatePage /> 
+          },
+          { path: 'category', element: <SelectCategoryPage /> },
+          { path: 'package/:name', element: <SelectPlanePage /> },
           { path: ':id/edit', element: <TourEditPage /> },
         ],
       },
+      
       { path: 'file-manager', element: <FileManagerPage /> },
       { path: 'mail', element: <MailPage /> },
       { path: 'chat', element: <ChatPage /> },

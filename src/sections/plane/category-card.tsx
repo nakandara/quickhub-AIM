@@ -17,16 +17,6 @@ import Image from 'src/components/image';
 import Iconify from 'src/components/iconify';
 
 import { IUserCard } from 'src/types/user';
-import { useNavigate,useLocation } from 'react-router-dom';
-
-import Modal from '@mui/material/Modal';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
-import Button from '@mui/material/Button';
-import { useState } from 'react';
-
 
 // ----------------------------------------------------------------------
 
@@ -35,49 +25,15 @@ type Props = {
   onClick: () => void; // Add onClick prop
 };
 
-const modalStyle = {
-  position: 'absolute' as const,
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: 400,
-  bgcolor: 'background.paper',
-  border: '2px solid #000',
-  boxShadow: 24,
-  p: 4,
-  borderRadius: 2,
-};
-
-
-export default function PlaneCard({ user,onClick }: Props) {
+export default function CategoryCard({ user,onClick }: Props) {
   const theme = useTheme();
-  const navigate = useNavigate();
-  const locationP = useLocation();  
-  
-  const lastSegment = locationP.pathname.split('/').pop(); 
 
-  console.log('Last URL Segment:', lastSegment); // This will log 'vehicles'
   const { name, coverUrl, role, totalFollowers, totalPosts, avatarUrl, totalFollowing } = user;
 
   
-  const [open, setOpen] = useState(false);
-  const [vehicle, setVehicle] = useState('');
-  const [location, setLocation] = useState('');
-  const [subLocation, setSubLocation] = useState('');
 
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-
-  
-
-  const handleCreatePost = () => {
-    navigate(`/dashboard/posts/new/${lastSegment}/${vehicle}/${location}/${subLocation}`);
-  }
-  
   return (
-    <>
-      {/* Existing Card Component */}
-      <Card onClick={handleOpen} sx={{ textAlign: 'center' }}>
+    <Card onClick={onClick} sx={{ textAlign: 'center' }}>
       <Box sx={{ position: 'relative' }}>
         <AvatarShape
           sx={{
@@ -167,46 +123,5 @@ export default function PlaneCard({ user,onClick }: Props) {
         </div>
       </Box>
     </Card>
-
-      {/* Popup Modal */}
-      <Modal open={open} onClose={handleClose}>
-        <Box sx={modalStyle}>
-          <Typography variant="h6" sx={{ mb: 2 }}>
-            Select Details
-          </Typography>
-
-          <FormControl fullWidth sx={{ mb: 2 }}>
-            <InputLabel>Select a Vehicle</InputLabel>
-            <Select value={vehicle} onChange={(e) => setVehicle(e.target.value)}>
-              <MenuItem value="Car">Car</MenuItem>
-              <MenuItem value="Bike">Bike</MenuItem>
-              <MenuItem value="Truck">Truck</MenuItem>
-            </Select>
-          </FormControl>
-
-          <FormControl fullWidth sx={{ mb: 2 }}>
-            <InputLabel>Select a Location</InputLabel>
-            <Select value={location} onChange={(e) => setLocation(e.target.value)}>
-              <MenuItem value="Colombo">Colombo</MenuItem>
-              <MenuItem value="Kandy">Kandy</MenuItem>
-              <MenuItem value="Galle">Galle</MenuItem>
-            </Select>
-          </FormControl>
-
-          <FormControl fullWidth sx={{ mb: 2 }}>
-            <InputLabel>Select a Sub-Location</InputLabel>
-            <Select value={subLocation} onChange={(e) => setSubLocation(e.target.value)}>
-              <MenuItem value="Central">Central</MenuItem>
-              <MenuItem value="North">North</MenuItem>
-              <MenuItem value="South">South</MenuItem>
-            </Select>
-          </FormControl>
-
-          <Button variant="contained" onClick={handleCreatePost}>
-            Next
-          </Button>
-        </Box>
-      </Modal>
-    </>
   );
 }

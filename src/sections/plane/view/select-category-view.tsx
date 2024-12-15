@@ -9,15 +9,15 @@ import { _userCards } from 'src/_mock';
 import Iconify from 'src/components/iconify';
 import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
-import PlaneCardList from '../pale-card-list';
+import CategoryCardList from '../category-card-list';
 
 const users = [
     {
       id: "e99f09a7-dd88-49d5-b1c8-1daf80c2d7b1",
       avatarUrl: "https://worldadd-api.vercel.app/assets/images/avatar/avatar_1.jpg",
       coverUrl: "https://worldadd-api.vercel.app/assets/images/cover/cover_1.jpg",
-      name: "silver",
-      role: "HR Manager",
+      name: "vehicles",
+      role: "vehicles",
       totalFollowers: 9911,
       totalFollowing: 1947,
       totalPosts: 9124,
@@ -26,8 +26,8 @@ const users = [
       id: "e99f09a7-dd88-49d5-b1c8-1daf80c2d7b2",
       avatarUrl: "https://worldadd-api.vercel.app/assets/images/avatar/avatar_2.jpg",
       coverUrl: "https://worldadd-api.vercel.app/assets/images/cover/cover_2.jpg",
-      name: "platinum",
-      role: "Data Analyst",
+      name: "properties",
+      role: "properties",
       totalFollowers: 1947,
       totalFollowing: 9124,
       totalPosts: 6984,
@@ -49,7 +49,7 @@ const users = [
 
 // ----------------------------------------------------------------------
 
-export default function UserCardsView() {
+export default function SelectCategoryView() {
   const settings = useSettingsContext();
 
   return (
@@ -74,7 +74,7 @@ export default function UserCardsView() {
         sx={{ mb: { xs: 3, md: 5 } }}
       />
 
-      <PlaneCardList users={users} />
+      <CategoryCardList users={users} />
     </Container>
   );
 }

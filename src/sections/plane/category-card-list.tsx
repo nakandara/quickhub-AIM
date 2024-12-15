@@ -1,15 +1,14 @@
 import Box from '@mui/material/Box';
-import { useNavigate } from 'react-router-dom';
 import { IUserCard } from 'src/types/user';
-
-import PlaneCard from './plane-card';
+import { useNavigate } from 'react-router-dom';
+import CategoryCard from './category-card';
 
 
 type Props = {
   users: IUserCard[];
 };
 
-export default function PlaneCardList({ users }: Props) {
+export default function CategoryCardList({ users }: Props) {
   const navigate = useNavigate();
 
   const handleCardClick = (name: string) => {
@@ -27,7 +26,7 @@ export default function PlaneCardList({ users }: Props) {
       }}
     >
       {users.map((user) => (
-        <PlaneCard
+        <CategoryCard
           key={user.id}
           user={user}
           onClick={() => handleCardClick(user.name)}

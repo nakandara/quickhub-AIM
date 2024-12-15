@@ -1,34 +1,27 @@
-import React, { useState } from 'react';
-import { Button, Dialog, DialogActions, DialogContent,useMediaQuery, DialogTitle, MenuItem, Select, FormControl, InputLabel, IconButton, Tooltip } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { Button,Tooltip, IconButton, useMediaQuery } from '@mui/material';
 import Iconify from 'src/components/iconify';
 import { useTheme } from '@mui/material/styles';
 import { paths } from 'src/routes/paths';
 
 export default function CreateAdd() {
-  const [open, setOpen] = useState(false);
-  const [city, setCity] = useState('');
-  const [category, setCategory] = useState('');
   const navigate = useNavigate();
   const location = useLocation(); // Get the current location
-
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm')); // Detect screen size
 
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-
-  const handleNext = () => {
-    if (city && category) {
-      handleClose();
-      navigate(paths.dashboard.posts.new);
-    } else {
-      alert('Please select both city and category');
-    }
+  const handleNavigate = () => {
+    navigate(paths.dashboard.posts.category);
   };
 
-  // Hide the button if the current route is '/dashboard/tour/new'
-  if (location.pathname === paths.dashboard.posts.new) {
+  // Hide the button if the current route is '/dashboard/posts/new'
+  if (location.pathname === paths.dashboard.posts.category) {
+    return null;
+  }
+  const pathSegments = location.pathname.split("/");
+  const postId = pathSegments[pathSegments.length - 1]; 
+  
+  if (["vehicles", "properties"].includes(postId)) {
     return null;
   }
 
@@ -38,7 +31,7 @@ export default function CreateAdd() {
         <Tooltip title="Create Your Post">
           <IconButton
             color="primary"
-            onClick={handleOpen}
+            onClick={handleNavigate}
             sx={{
               padding: '8px',
             }}
@@ -50,7 +43,7 @@ export default function CreateAdd() {
         <Button
           variant="contained"
           color="primary"
-          onClick={handleOpen}
+          onClick={handleNavigate}
           startIcon={<Iconify icon="mingcute:add-line" />}
           sx={{
             padding: { xs: '6px 10px', sm: '10px 20px', md: '12px 24px' },
@@ -62,37 +55,6 @@ export default function CreateAdd() {
           Create Your Post
         </Button>
       )}
-
-      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-        <DialogTitle>Select Details</DialogTitle>
-        <DialogContent>
-          <FormControl fullWidth margin="normal">
-            <InputLabel>City</InputLabel>
-            <Select value={city} onChange={(e) => setCity(e.target.value)} fullWidth>
-              <MenuItem value="Colombo">Colombo</MenuItem>
-              <MenuItem value="Kandy">Kandy</MenuItem>
-              <MenuItem value="Galle">Galle</MenuItem>
-            </Select>
-          </FormControl>
-
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Category</InputLabel>
-            <Select value={category} onChange={(e) => setCategory(e.target.value)} fullWidth>
-              <MenuItem value="Car">Car</MenuItem>
-              <MenuItem value="Bike">Bike</MenuItem>
-              <MenuItem value="Truck">Truck</MenuItem>
-            </Select>
-          </FormControl>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} color="secondary">
-            Cancel
-          </Button>
-          <Button onClick={handleNext} variant="contained" color="primary">
-            Next
-          </Button>
-        </DialogActions>
-      </Dialog>
     </>
   );
 }

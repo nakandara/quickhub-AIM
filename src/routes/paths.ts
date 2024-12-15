@@ -190,8 +190,10 @@ export const paths = {
     },
     posts: {
       root: `${ROOTS.DASHBOARD}/posts`,
-      new: `${ROOTS.DASHBOARD}/posts/new`,
-      plane: `${ROOTS.DASHBOARD}/posts/plane`,
+      new: (lastSegment: string, vehicle: string,location:string, subLocation: string) =>
+        `${ROOTS.DASHBOARD}/posts/new/${lastSegment}/${vehicle}/${subLocation}`,
+      category: `${ROOTS.DASHBOARD}/posts/category`,
+      package: (id: string) => `${ROOTS.DASHBOARD}/posts/${id}`,
       details: (id: string) => `${ROOTS.DASHBOARD}/posts/${id}`,
       edit: (id: string) => `${ROOTS.DASHBOARD}/posts/${id}/edit`,
       demo: {

@@ -1,12 +1,12 @@
 import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, Controller } from 'react-hook-form';
-import { useMemo, useEffect, useCallback } from 'react';
+import { useMemo, useEffect, useCallback, useState } from 'react';
 
 import Chip from '@mui/material/Chip';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
-import Avatar from '@mui/material/Avatar';
+
 import Switch from '@mui/material/Switch';
 import Grid from '@mui/material/Unstable_Grid2';
 import CardHeader from '@mui/material/CardHeader';
@@ -15,18 +15,19 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import FormControlLabel from '@mui/material/FormControlLabel';
 
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
 
 import { useResponsive } from 'src/hooks/use-responsive';
 
 import { countries } from 'src/assets/data';
-import { _tags, _tourGuides, TOUR_SERVICE_OPTIONS } from 'src/_mock';
+import { _tags, _tourGuides,CONDITION } from 'src/_mock';
 
 import { useSnackbar } from 'src/components/snackbar';
 import FormProvider, {
   RHFEditor,
-  RHFUpload,
   RHFTextField,
   RHFAutocomplete,
   RHFMultiCheckbox,
@@ -35,35 +36,26 @@ import FormProvider, {
 import { ITourItem, ITourGuide } from 'src/types/tour';
 import { useMockedUser } from 'src/hooks/use-mocked-user';
 import { createPost } from 'src/api/post';
+import { Box } from '@mui/system';
+import { Button, CircularProgress, IconButton } from '@mui/material';
+import Iconify from 'src/components/iconify/iconify';
+import { storage } from '../auth/firebase/firebase-image';
 
 // ----------------------------------------------------------------------
-
-type Props = {
-  currentTour?: ITourItem;
-};
-
-type FormValues = {
-  title: string;
-  content: string;
-  images: File[];
-  tourGuides: ITourGuide[];
-  tags: string[];
-  durations: string;
-  destination: string;
-  services: string[];
-  available: {
-    startDate: Date | null;
-    endDate: Date | null;
-  };
-};
 
 
 
 export default function TourNewEditForm({ currentTour }: any) {
   const router = useRouter();
   const { user } = useMockedUser();
-  console.log(user?._id,'pppppppppppppp');
-  
+  const pathParts = window.location.pathname.split('/');
+  const city = pathParts.slice(-2).join('/');
+
+
+console.log(city,'ooooooo');
+
+  const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
+  const [uploading, setUploading] = useState(false);
 
   const mdUp = useResponsive('up', 'md');
 
@@ -73,6 +65,13 @@ export default function TourNewEditForm({ currentTour }: any) {
     userId: Yup.string().required('User ID is required'),
     title: Yup.string().required('Title is required'),
     bodyType: Yup.string().required('Body Type is required'),
+    mobileNumber: Yup.string()
+    .required('Mobile number is required')
+    .matches(/^[0-9]{10}$/, 'Mobile number must be exactly 10 digits'),
+    whatsappNumber: Yup.string()
+    .required('whatsappNumber number is required')
+    .matches(/^[0-9]{10}$/, 'Mobile number must be exactly 10 digits'),
+    brand: Yup.string().required('brand Type is required'),
     price: Yup.string().required('Price is required'),
     description: Yup.string().required('Description is required'),
     images: Yup.array().of(Yup.mixed()).min(1, 'Images are required'),
@@ -90,26 +89,20 @@ export default function TourNewEditForm({ currentTour }: any) {
       .required('Mileage is required')
       .matches(/^\d+$/, 'Mileage must be a number'), // Ensure it is numeric
     tags: Yup.array().of(Yup.string()).min(2, 'Must have at least 2 tags'),
-    services: Yup.array().of(Yup.string()).min(2, 'Must have at least 2 services'),
+    services: Yup.array().of(Yup.string()).min(1, 'Must have at least 2 services'),
     destination: Yup.string().required('Destination is required'),
-    available: Yup.object().shape({
-      startDate: Yup.date()
-        .nullable()
-        .required('Start date is required'),
-      endDate: Yup.date()
-        .nullable()
-        .required('End date is required')
-        .min(Yup.ref('startDate'), 'End date must be later than start date'),
-    }),
+  
+    
   });
-  
-  
+
   const defaultValues = useMemo(
     () => ({
       userId: user?._id || '',
       title: currentTour?.title || '',
       price: currentTour?.price || '',
       bodyType: currentTour?.bodyType || '',
+      city: currentTour?.city || '',
+      brand:currentTour?.brand || '',
       description: currentTour?.content || '',
       images: currentTour?.images || [],
       fuelType: currentTour?.fuelType || [],
@@ -120,20 +113,16 @@ export default function TourNewEditForm({ currentTour }: any) {
       mileage: currentTour?.mileage || '', // New field
       destination: currentTour?.destination || '',
       services: currentTour?.services || [],
-      available: {
-        startDate: currentTour?.available?.startDate || null,
-        endDate: currentTour?.available?.endDate || null,
-      },
+      mobileNumber: currentTour?.mobileNumber || '', 
+      whatsappNumber:currentTour?.mobileNumber || '', 
     }),
     [currentTour, user]
   );
-  
 
   const methods = useForm<any>({
     resolver: yupResolver(NewTourSchema),
     defaultValues,
   });
-  
 
   const {
     watch,
@@ -153,46 +142,88 @@ export default function TourNewEditForm({ currentTour }: any) {
   }, [currentTour, defaultValues, reset]);
 
   const onSubmit = handleSubmit(async (data) => {
-    console.log(data,'------------------');
-    
     try {
       await new Promise((resolve) => setTimeout(resolve, 500));
+      
+      // Add city to form data before submission
+      data.city = city;
+  
       reset();
       enqueueSnackbar(currentTour ? 'Update success!' : 'Create success!');
-      createPost(data)
+      createPost(data);
       router.push(paths.dashboard.tour.root);
-      console.info('DATA', data);
+      console.info('Submitted Data:', data);
     } catch (error) {
-      console.error(error);
+      console.error('Submission Error:', error);
     }
   });
+  
 
-  const handleDrop = useCallback(
-    (acceptedFiles: File[]) => {
-      const files = values.images || [];
+  // const handleDrop = useCallback(
+  //   (acceptedFiles: File[]) => {
+  //     const files = values.images || [];
 
-      const newFiles = acceptedFiles.map((file) =>
-        Object.assign(file, {
-          preview: URL.createObjectURL(file),
-        })
-      );
+  //     const newFiles = acceptedFiles.map((file) =>
+  //       Object.assign(file, {
+  //         preview: URL.createObjectURL(file),
+  //       })
+  //     );
 
-      setValue('images', [...files, ...newFiles], { shouldValidate: true });
-    },
-    [setValue, values.images]
-  );
+  //     setValue('images', [...files, ...newFiles], { shouldValidate: true });
+  //   },
+  //   [setValue, values.images]
+  // );
 
-  const handleRemoveFile = useCallback(
-    (inputFile: File | string) => {
-      const filtered = values.images && values.images?.filter((file:any) => file !== inputFile);
-      setValue('images', filtered);
-    },
-    [setValue, values.images]
-  );
 
-  const handleRemoveAllFiles = useCallback(() => {
-    setValue('images', []);
-  }, [setValue]);
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const currentImages = values.images || [];
+
+    if (currentImages.length + files.length > 4) {
+      console.log('Limit Exceeded', 'You can upload a maximum of 4 images.', 'warning');
+
+      return;
+    }
+
+    setUploading(true);
+
+    const uploadedImageUrls = await Promise.all(
+      files.map(
+        (file) =>
+          new Promise<string>((resolve, reject) => {
+            const storageRef = ref(storage, `images/${file.name}`);
+            const uploadTask = uploadBytesResumable(storageRef, file);
+
+            uploadTask.on(
+              'state_changed',
+              (snapshot) => {
+                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                setUploadProgress((prev) => ({
+                  ...prev,
+                  [file.name]: Math.round(progress),
+                }));
+              },
+              (error) => {
+                console.error('Upload error:', error);
+                reject(error);
+              },
+              async () => {
+                const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                resolve(downloadURL);
+              }
+            );
+          })
+      )
+    );
+
+    setValue('images', [...currentImages, ...uploadedImageUrls]); // Update form images
+    setUploading(false);
+  };
+
+  const handleRemoveImage = (index: number) => {
+    const updatedImages = values.images.filter((_: any, i: number) => i !== index);
+    setValue('images', updatedImages);
+  };
 
   const renderDetails = (
     <>
@@ -212,39 +243,68 @@ export default function TourNewEditForm({ currentTour }: any) {
           {!mdUp && <CardHeader title="Details" />}
 
           <Stack spacing={3} sx={{ p: 3 }}>
-          <Stack spacing={1.5}>
-  <Typography variant="subtitle2">Title</Typography>
-  <RHFTextField name="title" placeholder="Ex: Adventure Seekers Expedition..." />
-</Stack>
-<Stack spacing={1.5}>
-  <Typography variant="subtitle2">price</Typography>
-  <RHFTextField name="price" placeholder="Ex: price.." />
-</Stack>
-
-
+            <Stack spacing={1.5}>
+              <Typography variant="subtitle2">Title</Typography>
+              <RHFTextField name="title" placeholder="Ex: Adventure Seekers Expedition..." />
+            </Stack>
+            <Stack spacing={1.5}>
+              <Typography variant="subtitle2">price</Typography>
+              <RHFTextField name="price" placeholder="Ex: price.." />
+            </Stack>
 
             <Stack spacing={1.5}>
               <Typography variant="subtitle2">Description</Typography>
               <RHFEditor simple name="description" />
             </Stack>
             <Stack spacing={1.5}>
-  <Typography variant="subtitle2">body Type</Typography>
-  <RHFTextField name="bodyType" placeholder="Ex: bodyType.." />
-</Stack>
-
-            <Stack spacing={1.5}>
-              <Typography variant="subtitle2">Images</Typography>
-              <RHFUpload
-                multiple
-                thumbnail
-                name="images"
-                maxSize={3145728}
-                onDrop={handleDrop}
-                onRemove={handleRemoveFile}
-                onRemoveAll={handleRemoveAllFiles}
-                onUpload={() => console.info('ON UPLOAD')}
-              />
+              <Typography variant="subtitle2">body Type</Typography>
+              <RHFTextField name="bodyType" placeholder="Ex: bodyType.." />
             </Stack>
+            <Stack spacing={1.5}>
+              <Typography variant="subtitle2">Brand</Typography>
+              <RHFTextField name="brand" placeholder="Ex: brand.." />
+            </Stack>
+
+            <Box mt={2}>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleFileUpload}
+                style={{ display: 'none' }}
+                id="upload-button"
+              />
+              <label htmlFor="upload-button">
+                <Button variant="contained" color="primary" component="span" disabled={uploading}>
+                  {uploading ? 'Uploading...' : 'Upload Images'}
+                </Button>
+              </label>
+              <Box mt={2}>
+                {values.images?.map((url: string, index: number) => (
+                  <Box key={index} display="flex" alignItems="center" mb={1}>
+                    <img
+                      src={url}
+                      alt={`uploaded-${index}`}
+                      width="100"
+                      style={{ marginRight: '10px' }}
+                    />
+                    <IconButton color="error" onClick={() => handleRemoveImage(index)}>
+                      <Iconify icon="mingcute:close-line" width={16} />
+                    </IconButton>
+                  </Box>
+                ))}
+                {uploading && (
+                  <Box mt={1}>
+                    {Object.entries(uploadProgress).map(([file, progress]) => (
+                      <Box key={file} display="flex" alignItems="center">
+                        <span>{file}:</span>
+                        <CircularProgress variant="determinate" value={progress} size={30} />
+                      </Box>
+                    ))}
+                  </Box>
+                )}
+              </Box>
+            </Box>
           </Stack>
         </Card>
       </Grid>
@@ -274,112 +334,80 @@ export default function TourNewEditForm({ currentTour }: any) {
                 Tour Guide
               </Typography>
               <Stack>
-  <Typography variant="subtitle2" sx={{ mb: 1.5 }}>
-    Fuel Type
-  </Typography>
+                <Typography variant="subtitle2" sx={{ mb: 1.5 }}>
+                  Fuel Type
+                </Typography>
 
-  <RHFAutocomplete
-  name="fuelType"
-  multiple={false} // Allow single selection
-  placeholder="Select Fuel Type"
-  options={['Petrol', 'Diesel']}
-  getOptionLabel={(option) => option}
-  isOptionEqualToValue={(option, value) => option === value}
-  onChange={(event, value) => {
-    setValue('fuelType', value ? [value] : [], { shouldValidate: true }); // Convert to array
-  }}
-  renderTags={(selected, getTagProps) =>
-    selected.map((fuelType, index) => (
-      <Chip
-        {...getTagProps({ index })}
-        key={fuelType}
-        size="small"
-        variant="soft"
-        label={fuelType}
-      />
-    ))
-  }
-/>
-
-
-</Stack>
-
-
+                <RHFAutocomplete
+                  name="fuelType"
+                  multiple={false} // Allow single selection
+                  placeholder="Select Fuel Type"
+                  options={['Petrol', 'Diesel']}
+                  getOptionLabel={(option) => option}
+                  isOptionEqualToValue={(option, value) => option === value}
+                  onChange={(event, value) => {
+                    setValue('fuelType', value ? [value] : [], { shouldValidate: true }); // Convert to array
+                  }}
+                  renderTags={(selected, getTagProps) =>
+                    selected.map((fuelType, index) => (
+                      <Chip
+                        {...getTagProps({ index })}
+                        key={fuelType}
+                        size="small"
+                        variant="soft"
+                        label={fuelType}
+                      />
+                    ))
+                  }
+                />
+              </Stack>
+            </Stack>
+            <Stack spacing={1}>
+              <Typography variant="subtitle2">Condition
+              </Typography>
+              <RHFMultiCheckbox
+                name="services"
+                options={CONDITION}
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(2, 1fr)',
+                }}
+              />
             </Stack>
             <Stack>
-             
               <Stack>
-  <Typography variant="subtitle2" sx={{ mb: 1.5 }}>
-  transmission
-  </Typography>
+                <Typography variant="subtitle2" sx={{ mb: 1.5 }}>
+                  transmission
+                </Typography>
 
-  <RHFAutocomplete
-  name="transmission"
-  multiple={false} // Allow single selection
-  placeholder="Select transmission Type"
-  options={['Manual', 'Automatic','Semi-Automatic']}
-  getOptionLabel={(option) => option}
-  isOptionEqualToValue={(option, value) => option === value}
-  onChange={(event, value) => {
-    setValue('transmission', value ? [value] : [], { shouldValidate: true }); // Convert to array
-  }}
-  renderTags={(selected, getTagProps) =>
-    selected.map((transmission, index) => (
-      <Chip
-        {...getTagProps({ index })}
-        key={transmission}
-        size="small"
-        variant="soft"
-        label={transmission}
-      />
-    ))
-  }
-/>
-
-
-</Stack>
-
-
+                <RHFAutocomplete
+                  name="transmission"
+                  multiple={false} // Allow single selection
+                  placeholder="Select transmission Type"
+                  options={['Manual', 'Automatic', 'Semi-Automatic']}
+                  getOptionLabel={(option) => option}
+                  isOptionEqualToValue={(option, value) => option === value}
+                  onChange={(event, value) => {
+                    setValue('transmission', value ? [value] : [], { shouldValidate: true }); // Convert to array
+                  }}
+                  renderTags={(selected, getTagProps) =>
+                    selected.map((transmission, index) => (
+                      <Chip
+                        {...getTagProps({ index })}
+                        key={transmission}
+                        size="small"
+                        variant="soft"
+                        label={transmission}
+                      />
+                    ))
+                  }
+                />
+              </Stack>
             </Stack>
 
             <Stack spacing={1.5}>
               <Typography variant="subtitle2">Available</Typography>
-              <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
-                <Controller
-                  name="available.startDate"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <DatePicker
-                      {...field}
-                      format="dd/MM/yyyy"
-                      slotProps={{
-                        textField: {
-                          fullWidth: true,
-                          error: !!error,
-                          helperText: error?.message,
-                        },
-                      }}
-                    />
-                  )}
-                />
-                <Controller
-                  name="available.endDate"
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <DatePicker
-                      {...field}
-                      format="dd/MM/yyyy"
-                      slotProps={{
-                        textField: {
-                          fullWidth: true,
-                          error: !!error,
-                          helperText: error?.message,
-                        },
-                      }}
-                    />
-                  )}
-                />
-              </Stack>
+          
             </Stack>
 
             <Stack spacing={1.5}>
@@ -391,9 +419,17 @@ export default function TourNewEditForm({ currentTour }: any) {
               <RHFTextField name="engineCapacity" placeholder="Ex: 2500CC..." />
             </Stack>
             <Stack spacing={1.5}>
-  <Typography variant="subtitle2">Mileage</Typography>
-  <RHFTextField name="mileage" placeholder="Ex: 50000" />
-</Stack>
+              <Typography variant="subtitle2">Mileage</Typography>
+              <RHFTextField name="mileage" placeholder="Ex: 50000" />
+            </Stack>
+            <Stack spacing={1.5}>
+              <Typography variant="subtitle2">Mobile Number</Typography>
+              <RHFTextField name="mobileNumber" placeholder="+947145..." />
+            </Stack>
+            <Stack spacing={1.5}>
+              <Typography variant="subtitle2">whatsapp Number</Typography>
+              <RHFTextField name="whatsappNumber" placeholder="+947145..." />
+            </Stack>
 
             <Stack spacing={1.5}>
               <Typography variant="subtitle2">Destination</Typography>
@@ -406,17 +442,8 @@ export default function TourNewEditForm({ currentTour }: any) {
               />
             </Stack>
 
-            <Stack spacing={1}>
-              <Typography variant="subtitle2">Services</Typography>
-              <RHFMultiCheckbox
-                name="services"
-                options={TOUR_SERVICE_OPTIONS}
-                sx={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(2, 1fr)',
-                }}
-              />
-            </Stack>
+     
+            
 
             <Stack spacing={1.5}>
               <Typography variant="subtitle2">Tags</Typography>
@@ -458,7 +485,7 @@ export default function TourNewEditForm({ currentTour }: any) {
       <Grid xs={12} md={8} sx={{ display: 'flex', alignItems: 'center' }}>
         <FormControlLabel
           control={<Switch defaultChecked />}
-          label="Publish"
+          label="Negotiable"
           sx={{ flexGrow: 1, pl: 3 }}
         />
 
