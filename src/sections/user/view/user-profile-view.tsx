@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 import Tab from '@mui/material/Tab';
 import Card from '@mui/material/Card';
@@ -14,12 +14,14 @@ import { _userAbout, _userFeeds, _userFriends, _userGallery, _userFollowers } fr
 import Iconify from 'src/components/iconify';
 import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
+import { useMyAccountUser,useMyAccountProfilePhoto, fetchProfilePhoto } from 'src/api/my-account';
 
 import ProfileHome from '../profile-home';
 import ProfileCover from '../profile-cover';
 import ProfileFriends from '../profile-friends';
 import ProfileGallery from '../profile-gallery';
 import ProfileFollowers from '../profile-followers';
+
 
 // ----------------------------------------------------------------------
 
@@ -52,6 +54,12 @@ export default function UserProfileView() {
   const settings = useSettingsContext();
 
   const { user } = useMockedUser();
+  const { myUser } = useMyAccountUser(user?.userId);
+  const { myProfilePhoto, } = useMyAccountProfilePhoto(user?.userId);
+  const [photoUrl, setPhotoUrl] = useState<string>();
+  const [loading, setLoading] = useState<boolean>(true);
+
+const [fetchProgress, setFetchProgress] = useState<number>(0);
 
   const [searchFriends, setSearchFriends] = useState('');
 
@@ -64,6 +72,38 @@ export default function UserProfileView() {
   const handleSearchFriends = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchFriends(event.target.value);
   }, []);
+  useEffect(() => {
+    const getPhoto = async () => {
+      setLoading(true);
+      setFetchProgress(0);
+    
+      const interval = setInterval(() => {
+        setFetchProgress((prev) => Math.min(prev + 20, 100));
+      }, 200);
+    
+      try {
+        const photo = await fetchProfilePhoto(user?.userId);
+        setPhotoUrl(photo || '');
+      } catch (error) {
+        console.error('Error fetching profile photo:', error);
+      } finally {
+        clearInterval(interval);
+        setFetchProgress(100);
+        setLoading(false);
+      }
+    };
+    
+    getPhoto();
+  }, [user?.userId]);
+
+  console.log(myUser?.username,'rrrrrr');
+  console.log(myProfilePhoto,'4444444444');
+  
+
+  console.log(_userAbout,'-------------');
+
+  console.log(_userFeeds,'------------ssssssssssssss-');
+  
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -86,9 +126,9 @@ export default function UserProfileView() {
         }}
       >
         <ProfileCover
-          role={_userAbout.role}
+          role={myUser?.username || 'Unknown'}
           name={user?.displayName}
-          avatarUrl={user?.photoURL}
+          avatarUrl={photoUrl || 'Unknown'}
           coverUrl={_userAbout.coverUrl}
         />
 
@@ -116,7 +156,7 @@ export default function UserProfileView() {
         </Tabs>
       </Card>
 
-      {currentTab === 'profile' && <ProfileHome info={_userAbout} posts={_userFeeds} />}
+      {currentTab === 'profile' && <ProfileHome info={myUser} posts={_userFeeds} />}
 
       {currentTab === 'followers' && <ProfileFollowers followers={_userFollowers} />}
 

@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import { useMemo, useCallback } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 
@@ -30,6 +30,13 @@ import FormProvider, {
 } from 'src/components/hook-form';
 
 import { IUserItem } from 'src/types/user';
+import { ref,getDownloadURL, uploadBytesResumable } from 'firebase/storage';
+import { fetchProfilePhoto, updateProfilePhoto } from 'src/api/my-account';
+import { LinearProgress } from '@mui/material';
+
+import { useMockedUser } from 'src/hooks/use-mocked-user';
+
+import { storage } from '../auth/firebase/firebase-image';
 
 // ----------------------------------------------------------------------
 
@@ -39,8 +46,13 @@ type Props = {
 
 export default function UserNewEditForm({ currentUser }: Props) {
   const router = useRouter();
-
+  const { user } = useMockedUser();
   const { enqueueSnackbar } = useSnackbar();
+  const [photoUrl, setPhotoUrl] = useState<string>();
+  const [loading, setLoading] = useState<boolean>(true);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+const [fetchProgress, setFetchProgress] = useState<number>(0);
+
 
   const NewUserSchema = Yup.object().shape({
     name: Yup.string().required('Name is required'),
@@ -59,6 +71,33 @@ export default function UserNewEditForm({ currentUser }: Props) {
     isVerified: Yup.boolean(),
   });
 
+  useEffect(() => {
+    const getPhoto = async () => {
+      setLoading(true);
+      setFetchProgress(0);
+    
+      const interval = setInterval(() => {
+        setFetchProgress((prev) => Math.min(prev + 20, 100));
+      }, 200);
+    
+      try {
+        const photo = await fetchProfilePhoto(user?.userId);
+        setPhotoUrl(photo || '');
+      } catch (error) {
+        console.error('Error fetching profile photo:', error);
+      } finally {
+        clearInterval(interval);
+        setFetchProgress(100);
+        setLoading(false);
+      }
+    };
+    
+    getPhoto();
+  }, [user?.userId]);
+
+  console.log(photoUrl,'tttttttttt');
+  
+
   const defaultValues = useMemo(
     () => ({
       name: currentUser?.name || '',
@@ -71,16 +110,17 @@ export default function UserNewEditForm({ currentUser }: Props) {
       country: currentUser?.country || '',
       zipCode: currentUser?.zipCode || '',
       company: currentUser?.company || '',
-      avatarUrl: currentUser?.avatarUrl || null,
+      avatarUrl: photoUrl || currentUser?.avatarUrl || '', 
       phoneNumber: currentUser?.phoneNumber || '',
       isVerified: currentUser?.isVerified || true,
     }),
-    [currentUser]
+    [currentUser,photoUrl]
   );
 
   const methods = useForm({
     resolver: yupResolver(NewUserSchema),
     defaultValues,
+    reValidateMode: 'onChange',
   });
 
   const {
@@ -94,6 +134,11 @@ export default function UserNewEditForm({ currentUser }: Props) {
 
   const values = watch();
 
+  const [uploading, setUploading] = useState(false);
+  
+  useEffect(() => {
+    reset(defaultValues);
+  }, [defaultValues, reset]);
   const onSubmit = handleSubmit(async (data) => {
     try {
       await new Promise((resolve) => setTimeout(resolve, 500));
@@ -106,20 +151,52 @@ export default function UserNewEditForm({ currentUser }: Props) {
     }
   });
 
-  const handleDrop = useCallback(
-    (acceptedFiles: File[]) => {
-      const file = acceptedFiles[0];
-
-      const newFile = Object.assign(file, {
-        preview: URL.createObjectURL(file),
-      });
-
-      if (file) {
-        setValue('avatarUrl', newFile, { shouldValidate: true });
-      }
-    },
-    [setValue]
-  );
+  const handleDrop = async (acceptedFiles: File[]) => {
+    const file = acceptedFiles[0];
+    if (!file) return;
+  
+    setUploading(true);
+  
+    try {
+      const storageRef = ref(storage, `profilePhotos/${file.name}`);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+  
+      uploadTask.on(
+        'state_changed',
+        (snapshot) => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          setUploadProgress(progress); // Update progress
+          console.log(`Upload is ${progress}% done`);
+        },
+        (error) => {
+          console.error('Upload error:', error);
+          enqueueSnackbar('Failed to upload image', { variant: 'error' });
+          setUploading(false);
+        },
+        async () => {
+          const imageUrl = await getDownloadURL(uploadTask.snapshot.ref);
+          console.log('File available at', imageUrl);
+          const isUpdated = await updateProfilePhoto(user?.userId || '', imageUrl);
+          if (isUpdated) {
+            setValue('avatarUrl', imageUrl, { shouldValidate: true });
+            enqueueSnackbar('Profile photo updated successfully', { variant: 'success' });
+          } else {
+            enqueueSnackbar('Failed to update profile photo', { variant: 'error' });
+          }
+          setUploading(false);
+          setUploadProgress(100); // Complete progress
+        }
+      );
+      
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      enqueueSnackbar('Failed to upload image', { variant: 'error' });
+      setUploading(false);
+    }
+  };
+  
+ 
+  
 
   return (
     <FormProvider methods={methods} onSubmit={onSubmit}>
@@ -140,26 +217,40 @@ export default function UserNewEditForm({ currentUser }: Props) {
             )}
 
             <Box sx={{ mb: 5 }}>
-              <RHFUploadAvatar
-                name="avatarUrl"
-                maxSize={3145728}
-                onDrop={handleDrop}
-                helperText={
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      mt: 3,
-                      mx: 'auto',
-                      display: 'block',
-                      textAlign: 'center',
-                      color: 'text.disabled',
-                    }}
-                  >
-                    Allowed *.jpeg, *.jpg, *.png, *.gif
-                    <br /> max size of {fData(3145728)}
-                  </Typography>
-                }
-              />
+            
+            <Box sx={{ mb: 5 }}>
+  <RHFUploadAvatar
+    name="avatarUrl"
+    maxSize={3145728}
+    onDrop={handleDrop}
+    disabled={uploading}
+    helperText={
+      <Typography
+        variant="caption"
+        sx={{
+          mt: 3,
+          mx: 'auto',
+          display: 'block',
+          textAlign: 'center',
+          color: 'text.disabled',
+        }}
+      >
+        Allowed *.jpeg, *.jpg, *.png, *.gif
+        <br /> max size of {fData(3145728)}
+      </Typography>
+    }
+  />
+  <Box sx={{ width: '100%', mt: 2 }}>
+    {(uploading || loading) && (
+      <LinearProgress
+        variant="determinate"
+        value={uploading ? uploadProgress : fetchProgress}
+      />
+    )}
+  </Box>
+</Box>
+
+
             </Box>
 
             {currentUser && (
@@ -234,6 +325,8 @@ export default function UserNewEditForm({ currentUser }: Props) {
               <RHFTextField name="name" label="Full Name" />
               <RHFTextField name="email" label="Email Address" />
               <RHFTextField name="phoneNumber" label="Phone Number" />
+
+
 
               <RHFAutocomplete
                 name="country"

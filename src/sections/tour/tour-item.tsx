@@ -41,6 +41,7 @@ export default function TourItem({ tour, onView, onEdit, onDelete }: Props) {
     mileage,
     fuelType,
     engineCapacity,
+    title
     
   } = tour;
 
@@ -108,7 +109,7 @@ export default function TourItem({ tour, onView, onEdit, onDelete }: Props) {
       primary={`Posted date: ${fDateTime(createdAt)}`}
       secondary={
         <Link component={RouterLink} href={paths.dashboard.tour.details(_id)} color="inherit">
-          {model}
+          {model} { title}
         </Link>
       }
       primaryTypographyProps={{

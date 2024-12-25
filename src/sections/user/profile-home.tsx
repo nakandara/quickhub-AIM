@@ -38,6 +38,9 @@ export default function ProfileHome({ info, posts }: Props) {
     }
   };
 
+  console.log(info,'gggggggggggeee');
+  
+
   const renderFollows = (
     <Card sx={{ py: 3, textAlign: 'center', typography: 'h4' }}>
       <Stack
@@ -45,14 +48,14 @@ export default function ProfileHome({ info, posts }: Props) {
         divider={<Divider orientation="vertical" flexItem sx={{ borderStyle: 'dashed' }} />}
       >
         <Stack width={1}>
-          {fNumber(info.totalFollowers)}
+        cs
           <Box component="span" sx={{ color: 'text.secondary', typography: 'body2' }}>
             Follower
           </Box>
         </Stack>
 
         <Stack width={1}>
-          {fNumber(info.totalFollowing)}
+         scsc
           <Box component="span" sx={{ color: 'text.secondary', typography: 'body2' }}>
             Following
           </Box>
@@ -66,7 +69,7 @@ export default function ProfileHome({ info, posts }: Props) {
       <CardHeader title="About" />
 
       <Stack spacing={2} sx={{ p: 3 }}>
-        <Box sx={{ typography: 'body2' }}>{info.quote}</Box>
+        <Box sx={{ typography: 'body2' }}>{info?.username}</Box>
 
         <Stack direction="row" spacing={2}>
           <Iconify icon="mingcute:location-fill" width={24} />
@@ -74,23 +77,23 @@ export default function ProfileHome({ info, posts }: Props) {
           <Box sx={{ typography: 'body2' }}>
             {`Live at `}
             <Link variant="subtitle2" color="inherit">
-              {info.country}
+      {info?.district}
             </Link>
           </Box>
         </Stack>
 
         <Stack direction="row" sx={{ typography: 'body2' }}>
           <Iconify icon="fluent:mail-24-filled" width={24} sx={{ mr: 2 }} />
-          {info.email}
+          {info?.gender}
         </Stack>
 
         <Stack direction="row" spacing={2}>
           <Iconify icon="ic:round-business-center" width={24} />
 
           <Box sx={{ typography: 'body2' }}>
-            {info.role} {`at `}
+          dbdb
             <Link variant="subtitle2" color="inherit">
-              {info.company}
+             cbcbc
             </Link>
           </Box>
         </Stack>
@@ -101,7 +104,7 @@ export default function ProfileHome({ info, posts }: Props) {
           <Box sx={{ typography: 'body2' }}>
             {`Studied at `}
             <Link variant="subtitle2" color="inherit">
-              {info.school}
+            dgdgd
             </Link>
           </Box>
         </Stack>
@@ -165,11 +168,8 @@ export default function ProfileHome({ info, posts }: Props) {
               }}
             />
             <Link color="inherit">
-              {link.value === 'facebook' && info.socialLinks.facebook}
-              {link.value === 'instagram' && info.socialLinks.instagram}
-              {link.value === 'linkedin' && info.socialLinks.linkedin}
-              {link.value === 'twitter' && info.socialLinks.twitter}
-            </Link>
+            
+dgdgad            </Link>
           </Stack>
         ))}
       </Stack>
@@ -192,9 +192,9 @@ export default function ProfileHome({ info, posts }: Props) {
         <Stack spacing={3}>
           {renderPostInput}
 
-          {posts.map((post) => (
+          {/* {posts.map((post) => (
             <ProfilePostItem key={post.id} post={post} />
-          ))}
+          ))} */}
         </Stack>
       </Grid>
     </Grid>

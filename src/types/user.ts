@@ -28,7 +28,10 @@ export type IUserProfileCover = {
 
 export type IUserProfile = {
   id: string;
+  username:string,
   role: string;
+  district:string;
+  gender:string;
   quote: string;
   email: string;
   school: string;

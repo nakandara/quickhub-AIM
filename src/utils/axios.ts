@@ -17,6 +17,7 @@ export default axiosInstance;
 
 export const fetcher = async (args: string | [string, AxiosRequestConfig]) => {
   const [url, config] = Array.isArray(args) ? args : [args];
+  
 
   const res = await axiosInstance.get(url, { ...config });
 
@@ -44,6 +45,12 @@ export const endpoints = {
     details: '/api/post/details',
     latest: '/api/post/latest',
     search: '/api/post/search',
+  },
+  my_account: {
+    list: '/api/post/list',
+    details: 'api/getProfile',
+    getProfilePhoto: 'api/getProfilePhoto',
+ 
   },
   product: {
     list: '/api/product/list',

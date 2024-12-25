@@ -45,7 +45,7 @@ export function useGetLatestPosts(title: string) {
   }
 
   export async function createPost(postData: Record<string, any>) {
-    const URL = 'http://localhost:8080/api/createPost'; 
+    const URL = 'https://worldadd-api.vercel.app/api/createPost'; 
     const formData = new FormData();
   
     // Iterate over postData entries
