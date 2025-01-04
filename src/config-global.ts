@@ -3,8 +3,8 @@ import { paths } from 'src/routes/paths';
 // API
 // ----------------------------------------------------------------------
 
-export const HOST_API = 'https://worldadd-api.vercel.app';
-export const ASSETS_API = 'https://worldadd-api.vercel.app';
+export const HOST_API = import.meta.env.VITE_HOST_API
+export const ASSETS_API = import.meta.env.VITE_HOST_API
 
 export const FIREBASE_API = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,

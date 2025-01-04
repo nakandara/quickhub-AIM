@@ -3,7 +3,9 @@ import { useMemo } from 'react';
 
 import axios, { fetcher, endpoints } from 'src/utils/axios';
 
+import { HOST_API } from 'src/config-global';
 import { IPostItem } from 'src/types/blog';
+
 
 
 
@@ -27,7 +29,7 @@ export function useGetLatestPosts(title: string) {
   }
 
   export function useGetVerifiedPosts() {
-    const URL = 'https://worldadd-api.vercel.app/api/getVerifyAllPosts';
+    const URL = `${HOST_API}/api/getVerifyAllPosts`;
     const { data, isLoading, error, isValidating } = useSWR(URL, fetcher);
   
     const memoizedValue = useMemo(
@@ -45,7 +47,7 @@ export function useGetLatestPosts(title: string) {
   }
 
   export async function createPost(postData: Record<string, any>) {
-    const URL = 'https://worldadd-api.vercel.app/api/createPost'; 
+    const URL = `${HOST_API}/api/createPost`; 
     const formData = new FormData();
   
     // Iterate over postData entries

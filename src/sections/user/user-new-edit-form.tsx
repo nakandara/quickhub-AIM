@@ -12,8 +12,6 @@ import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 import LoadingButton from '@mui/lab/LoadingButton';
 import FormControlLabel from '@mui/material/FormControlLabel';
-
-import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
 
 import { fData } from 'src/utils/format-number';
@@ -28,10 +26,10 @@ import FormProvider, {
   RHFUploadAvatar,
   RHFAutocomplete,
 } from 'src/components/hook-form';
-
-import { IUserItem } from 'src/types/user';
 import { ref,getDownloadURL, uploadBytesResumable } from 'firebase/storage';
-import { fetchProfilePhoto, updateProfilePhoto } from 'src/api/my-account';
+
+import { IUserItem1 } from 'src/types/user';
+import { createProfile,updateProfile, fetchProfilePhoto, updateProfilePhoto } from 'src/api/my-account';
 import { LinearProgress } from '@mui/material';
 
 import { useMockedUser } from 'src/hooks/use-mocked-user';
@@ -41,7 +39,7 @@ import { storage } from '../auth/firebase/firebase-image';
 // ----------------------------------------------------------------------
 
 type Props = {
-  currentUser?: IUserItem;
+  currentUser?: IUserItem1;
 };
 
 export default function UserNewEditForm({ currentUser }: Props) {
@@ -49,24 +47,23 @@ export default function UserNewEditForm({ currentUser }: Props) {
   const { user } = useMockedUser();
   const { enqueueSnackbar } = useSnackbar();
   const [photoUrl, setPhotoUrl] = useState<string>();
+
   const [loading, setLoading] = useState<boolean>(true);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
 const [fetchProgress, setFetchProgress] = useState<number>(0);
 
 
   const NewUserSchema = Yup.object().shape({
-    name: Yup.string().required('Name is required'),
+    username: Yup.string().required('Name is required'),
     email: Yup.string().required('Email is required').email('Email must be a valid email address'),
     phoneNumber: Yup.string().required('Phone number is required'),
     address: Yup.string().required('Address is required'),
     country: Yup.string().required('Country is required'),
-    company: Yup.string().required('Company is required'),
+    birthday: Yup.string().required('birthday is required'),
     state: Yup.string().required('State is required'),
     city: Yup.string().required('City is required'),
-    role: Yup.string().required('Role is required'),
     zipCode: Yup.string().required('Zip code is required'),
     avatarUrl: Yup.mixed<any>().nullable().required('Avatar is required'),
-    // not required
     status: Yup.string(),
     isVerified: Yup.boolean(),
   });
@@ -75,47 +72,46 @@ const [fetchProgress, setFetchProgress] = useState<number>(0);
     const getPhoto = async () => {
       setLoading(true);
       setFetchProgress(0);
-    
-      const interval = setInterval(() => {
-        setFetchProgress((prev) => Math.min(prev + 20, 100));
-      }, 200);
-    
+  
       try {
+        const interval = setInterval(() => {
+          setFetchProgress((prev) => Math.min(prev + 20, 100));
+        }, 200);
+  
         const photo = await fetchProfilePhoto(user?.userId);
         setPhotoUrl(photo || '');
+  
+        clearInterval(interval);
+        setFetchProgress(100);
       } catch (error) {
         console.error('Error fetching profile photo:', error);
       } finally {
-        clearInterval(interval);
-        setFetchProgress(100);
         setLoading(false);
       }
     };
-    
+  
     getPhoto();
   }, [user?.userId]);
-
-  console.log(photoUrl,'tttttttttt');
   
 
-  const defaultValues = useMemo(
-    () => ({
-      name: currentUser?.name || '',
-      city: currentUser?.city || '',
-      role: currentUser?.role || '',
-      email: currentUser?.email || '',
-      state: currentUser?.state || '',
-      status: currentUser?.status || '',
-      address: currentUser?.address || '',
-      country: currentUser?.country || '',
-      zipCode: currentUser?.zipCode || '',
-      company: currentUser?.company || '',
-      avatarUrl: photoUrl || currentUser?.avatarUrl || '', 
-      phoneNumber: currentUser?.phoneNumber || '',
-      isVerified: currentUser?.isVerified || true,
-    }),
-    [currentUser,photoUrl]
-  );
+
+  const defaultValues = useMemo(() => ({
+    username: currentUser?.username || '',
+    city: currentUser?.city || '',
+    birthday: currentUser?.birthday || '',
+    email: currentUser?.email || '',
+    state: currentUser?.state || '',
+    status: currentUser?.status || '',
+    address: currentUser?.address || '',
+    country: currentUser?.country || '',
+    zipCode: currentUser?.zipCode || '',
+    gender: currentUser?.gender || '',
+    avatarUrl: photoUrl || currentUser?.avatarUrl || '', 
+    phoneNumber: currentUser?.phoneNumber || '',
+    isVerified: currentUser?.isVerified || true,
+  }), [currentUser, photoUrl]);
+  
+ 
 
   const methods = useForm({
     resolver: yupResolver(NewUserSchema),
@@ -140,16 +136,23 @@ const [fetchProgress, setFetchProgress] = useState<number>(0);
     reset(defaultValues);
   }, [defaultValues, reset]);
   const onSubmit = handleSubmit(async (data) => {
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      reset();
-      enqueueSnackbar(currentUser ? 'Update success!' : 'Create success!');
-      router.push(paths.dashboard.user.list);
-      console.info('DATA', data);
-    } catch (error) {
-      console.error(error);
+    const formattedData = {
+      ...data,
+      userId: currentUser?.id || '',
+    };
+  
+    const result = currentUser
+      ? await updateProfile(user?.userId, formattedData)
+      : await createProfile(formattedData);
+  
+    if (result) {
+      enqueueSnackbar("Operation successful!");
+    } else {
+      enqueueSnackbar("Operation failed!", { variant: "error" });
     }
   });
+  
+  
 
   const handleDrop = async (acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
@@ -322,7 +325,7 @@ const [fetchProgress, setFetchProgress] = useState<number>(0);
                 sm: 'repeat(2, 1fr)',
               }}
             >
-              <RHFTextField name="name" label="Full Name" />
+              <RHFTextField name="username" label="Full Name" />
               <RHFTextField name="email" label="Email Address" />
               <RHFTextField name="phoneNumber" label="Phone Number" />
 
@@ -342,8 +345,7 @@ const [fetchProgress, setFetchProgress] = useState<number>(0);
               <RHFTextField name="city" label="City" />
               <RHFTextField name="address" label="Address" />
               <RHFTextField name="zipCode" label="Zip/Code" />
-              <RHFTextField name="company" label="Company" />
-              <RHFTextField name="role" label="Role" />
+             
             </Box>
 
             <Stack alignItems="flex-end" sx={{ mt: 3 }}>
