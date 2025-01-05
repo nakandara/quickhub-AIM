@@ -9,6 +9,7 @@ export default function ChatPage() {
     <>
       <Helmet>
         <title> Dashboard: Chat</title>
+        
       </Helmet>
 
       <ChatView />
