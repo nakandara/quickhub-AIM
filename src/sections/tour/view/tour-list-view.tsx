@@ -1,6 +1,6 @@
 import orderBy from 'lodash/orderBy';
 import { useState, useCallback } from 'react';
-
+import { useLocation } from 'react-router';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
@@ -11,18 +11,18 @@ import { RouterLink } from 'src/routes/components';
 import { useBoolean } from 'src/hooks/use-boolean';
 
 import { isAfter, isBetween } from 'src/utils/format-time';
-import { useGetVerifiedPosts } from 'src/api/post';
-
-
+import { useGetUserPosts,useGetVerifiedPosts } from 'src/api/post';
 import { countries } from 'src/assets/data';
-import { _tours, _tourGuides, TOUR_SORT_OPTIONS, TOUR_SERVICE_OPTIONS } from 'src/_mock';
+import { _tourGuides, TOUR_SORT_OPTIONS, TOUR_SERVICE_OPTIONS } from 'src/_mock';
 
 import Iconify from 'src/components/iconify';
 import EmptyContent from 'src/components/empty-content';
 import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 
-import {ITourFilters ,AdPost} from 'src/types/tour';
+import { useMockedUser } from 'src/hooks/use-mocked-user';
+
+import {AdPost ,ITourFilters } from 'src/types/tour';
 
 import TourList from '../tour-list';
 import TourSort from '../tour-sort';
@@ -45,12 +45,16 @@ const defaultFilters: ITourFilters = {
 export default function TourListView() {
   const settings = useSettingsContext();
   const { verifiedPosts } = useGetVerifiedPosts();
+  const { user } = useMockedUser();
   const openFilters = useBoolean();
+  const location = useLocation();
+  const currentPath = location.pathname.split('/').pop();
 
   const [sortBy, setSortBy] = useState('latest');
 
+  const { userPosts } = useGetUserPosts(user?.userId);
 
-  const [search, setSearch] = useState<{ query: string; results:any }>({
+  const [search, setSearch] = useState<{ query: string; results: any }>({
     query: '',
     results: [],
   });
@@ -59,17 +63,15 @@ export default function TourListView() {
 
   const dateError = isAfter(filters.startDate, filters.endDate);
 
+  // Decide which data to use based on the currentPath
+  const dataSource = currentPath === 'yourAdvertisement' ? userPosts : verifiedPosts;
+
   const dataFiltered = applyFilter({
-    inputData: verifiedPosts,
+    inputData: dataSource, // Use the selected data source here
     filters,
     sortBy,
     dateError,
   });
-
-  console.log(_tours,'dataFiltereddataFiltered');
-  console.log(verifiedPosts,'===============');
-  
-  
 
   const canReset =
     !!filters.destination.length ||
@@ -100,19 +102,19 @@ export default function TourListView() {
         ...prevState,
         query: inputValue,
       }));
-  
+
       if (inputValue) {
-        const results = verifiedPosts.filter((tour: any) =>
+        const results = dataSource.filter((tour: any) =>
           tour.model.toLowerCase().includes(inputValue.toLowerCase())
         );
-  
+
         setSearch((prevState) => ({
           ...prevState,
           results,
         }));
       }
     },
-    [verifiedPosts]
+    [dataSource] 
   );
 
   const renderFilters = (

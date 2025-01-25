@@ -16,7 +16,7 @@ type Props = {
 
 export default function UserEditView({ id }: Props) {
   const settings = useSettingsContext();
-  const { user } = useMockedUser(); // Assuming this provides user details
+  const { user } = useMockedUser();
   const [currentUser, setCurrentUser] = useState<any | null>(null);
 
   useEffect(() => {

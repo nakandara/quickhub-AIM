@@ -83,3 +83,23 @@ export function useGetLatestPosts(title: string) {
     }
   }
   
+  export function useGetUserPosts(userId: string) {
+    
+    const URL = userId ? `${HOST_API}/api/getPosts/${userId}` : null;
+  
+    const { data, isLoading, error, isValidating } = useSWR(URL, fetcher);
+
+  
+    const memoizedValue = useMemo(
+      () => ({
+        userPosts: (data || []) as IPostItem[],
+        userPostsLoading: isLoading,
+        userPostsError: error,
+        userPostsValidating: isValidating,
+        userPostsEmpty: !isLoading && (data?.length || 0) === 0,
+      }),
+      [data, error, isLoading, isValidating]
+    );
+  
+    return memoizedValue;
+  }

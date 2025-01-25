@@ -64,6 +64,10 @@ const BlankPage = lazy(() => import('src/pages/dashboard/blank'));
 
 // Create Ads
 
+// yourAdvertisement
+
+const YourAdvertisement = lazy(() => import('src/pages/dashboard/showYourAdd'));
+
 const CreateAddsPage = lazy(() => import('src/pages/dashboard/create-adds'));
 const SelectPlanePage = lazy(() => import('src/pages/dashboard/select-plane'));
 const SelectCategoryPage = lazy(() => import('src/pages/dashboard/select-category'));
@@ -148,6 +152,16 @@ export const dashboardRoutes = [
         ],
       },
       {
+        path: 'post',
+        children: [
+          { element: <BlogPostsPage />, index: true },
+          { path: 'list', element: <BlogPostsPage /> },
+          { path: ':title', element: <BlogPostPage /> },
+          { path: ':title/edit', element: <BlogEditPostPage /> },
+          { path: 'new', element: <BlogNewPostPage /> },
+        ],
+      },
+      {
         path: 'job',
         children: [
           { element: <JobListPage />, index: true },
@@ -180,6 +194,14 @@ export const dashboardRoutes = [
           { path: 'category', element: <SelectCategoryPage /> },
           { path: 'package/:name', element: <SelectPlanePage /> },
           { path: ':id/edit', element: <TourEditPage /> },
+        ],
+      },
+
+      {
+        path: 'yourAdvertisement',
+        children: [
+          { element: <YourAdvertisement/>, index: true },
+         
         ],
       },
       

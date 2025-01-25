@@ -157,6 +157,17 @@ export const paths = {
         edit: `${ROOTS.DASHBOARD}/post/${paramCase(MOCK_TITLE)}/edit`,
       },
     },
+
+    yourAdvertisement: {
+      root: `${ROOTS.DASHBOARD}/yourAdvertisement`,
+      new: `${ROOTS.DASHBOARD}/post/new`,
+      details: (title: string) => `${ROOTS.DASHBOARD}/post/${paramCase(title)}`,
+      edit: (title: string) => `${ROOTS.DASHBOARD}/post/${paramCase(title)}/edit`,
+      demo: {
+        details: `${ROOTS.DASHBOARD}/post/${paramCase(MOCK_TITLE)}`,
+        edit: `${ROOTS.DASHBOARD}/post/${paramCase(MOCK_TITLE)}/edit`,
+      },
+    },
     order: {
       root: `${ROOTS.DASHBOARD}/order`,
       details: (id: string) => `${ROOTS.DASHBOARD}/order/${id}`,

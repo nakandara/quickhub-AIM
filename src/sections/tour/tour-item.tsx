@@ -87,15 +87,16 @@ export default function TourItem({ tour, onView, onEdit, onDelete }: Props) {
         />
       </Stack>
       <Stack spacing={0.5}>
-        {images.slice(1, 3).map((img: { imageUrl: string | undefined; }, index: Key | null | undefined) => (
-          <Image
-            key={index} // Use index as key or better use a unique identifier
-            alt={img.imageUrl} // Access the imageUrl
-            src={img.imageUrl} // Access the imageUrl
-            ratio="1/1"
-            sx={{ borderRadius: 1, width: 80 }}
-          />
-        ))}
+      {images.slice(1, 3).map((img, idx) => (
+  <Image
+    key={img.imageUrl || idx}
+    alt={img.imageUrl || `Image-${idx}`}
+    src={img.imageUrl}
+    ratio="1/1"
+    sx={{ borderRadius: 1, width: 80 }}
+  />
+))}
+
       </Stack>
     </Stack>
   );
@@ -134,24 +135,26 @@ export default function TourItem({ tour, onView, onEdit, onDelete }: Props) {
         p: (theme) => theme.spacing(0, 2.5, 2.5, 2.5),
       }}
     >
-      <IconButton onClick={popover.onOpen} sx={{ position: 'absolute', bottom: 20, right: 8 }}>
-        <Iconify icon="eva:more-vertical-fill" />
-      </IconButton>
+    <IconButton onClick={popover.onOpen} aria-label="More actions">
+  <Iconify icon="eva:more-vertical-fill" />
+</IconButton>
+
 
       {[
-        {
-          label: engineCapacity,
-          icon: <Iconify icon="mingcute:location-fill" sx={{ color: 'error.main' }} />,
-        },
-        {
-          label: engineCapacity,
-          icon: <Iconify icon="solar:clock-circle-bold" sx={{ color: 'info.main' }} />,
-        },
-        {
-          label: `${images.length} Booked`,
-          icon: <Iconify icon="solar:users-group-rounded-bold" sx={{ color: 'primary.main' }} />,
-        },
-      ].map((item) => (
+  {
+    label: `Capacity: ${engineCapacity}`,
+    icon: <Iconify icon="mingcute:location-fill" sx={{ color: 'error.main' }} />,
+  },
+  {
+    label: `Fuel Type: ${fuelType}`,
+    icon: <Iconify icon="solar:clock-circle-bold" sx={{ color: 'info.main' }} />,
+  },
+  {
+    label: `${images.length} Booked`,
+    icon: <Iconify icon="solar:users-group-rounded-bold" sx={{ color: 'primary.main' }} />,
+  },
+]
+.map((item) => (
         <Stack
           key={item.label}
           spacing={1}

@@ -181,7 +181,7 @@ export function useNavData() {
 
           // TOUR
           {
-            title: t('post'),
+            title: t('advertisements'),
             path: paths.dashboard.posts.root,
             icon: ICONS.tour,
             // children: [
@@ -192,6 +192,17 @@ export function useNavData() {
             // ],
           },
 
+          {
+            title: t('your advertisement'),
+            path: paths.dashboard.yourAdvertisement.root,
+            icon: ICONS.booking,
+            // children: [
+            //  // { title: t('list'), path: paths.dashboard.tour.root },
+            //   // { title: t('details'), path: paths.dashboard.tour.demo.details },
+            //   // { title: t('create'), path: paths.dashboard.tour.new },
+            //   // { title: t('edit'), path: paths.dashboard.tour.demo.edit },
+            // ],
+          },
           // FILE MANAGER
           // {
           //   title: t('file_manager'),
