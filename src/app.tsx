@@ -3,6 +3,7 @@ import 'src/global.css';
 
 // i18n
 import 'src/locales/i18n';
+import { io } from 'socket.io-client';
 
 // ----------------------------------------------------------------------
 
@@ -40,6 +41,20 @@ export default function App() {
   `;
 
   console.info(`%c${charAt}`, 'color: #5BE49B');
+  const socket = io('https://worldadd-api.vercel.app'); // Replace with your server URL
+
+  // Example: Listen for a backend-initiated message
+  socket.on('backend_message', (data) => {
+    console.log('Message from backend:', data);
+  });
+  
+  // Example: Listen for broadcasted messages
+  socket.on('receive_message', (data) => {
+    console.log('Broadcasted message:', data);
+  });
+  
+  // Optionally, send a message to the backend
+  socket.emit('send_message', 'Hello from the frontend!');
 
   useScrollToTop();
 
