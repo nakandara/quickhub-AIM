@@ -189,8 +189,8 @@ export default function HomeHero() {
             textAlign: 'center',
           }}
         >
-          Start a <br />
-          New Project with
+          Find And Create <br />
+          Advertisements
         </Typography>
       </m.div>
 
@@ -244,7 +244,7 @@ export default function HomeHero() {
               variant="contained"
               startIcon={<Iconify icon="eva:flash-fill" width={24} />}
             >
-              Live Preview
+             Get Start
             </Button>
 
             <Link
@@ -264,7 +264,7 @@ export default function HomeHero() {
             </Link>
           </Stack>
 
-          <Button
+          {/* <Button
             color="inherit"
             size="large"
             variant="outlined"
@@ -275,7 +275,7 @@ export default function HomeHero() {
             sx={{ borderColor: 'text.primary' }}
           >
             Design Preview
-          </Button>
+          </Button> */}
         </Stack>
       </m.div>
     </Stack>

@@ -9,6 +9,8 @@ import { _userCards } from 'src/_mock';
 import Iconify from 'src/components/iconify';
 import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
+
+import HomePricing from 'src/sections/home/home-pricing';
 import PlaneCardList from '../pale-card-list';
 
 const users = [
@@ -54,7 +56,7 @@ export default function UserCardsView() {
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
-      <CustomBreadcrumbs
+      {/* <CustomBreadcrumbs
         heading="User Plane"
         links={[
           { name: 'Dashboard', href: paths.dashboard.root },
@@ -74,7 +76,8 @@ export default function UserCardsView() {
         sx={{ mb: { xs: 3, md: 5 } }}
       />
 
-      <PlaneCardList users={users} />
+      <PlaneCardList users={users} /> */}
+      <HomePricing/>
     </Container>
   );
 }

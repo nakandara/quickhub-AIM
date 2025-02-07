@@ -19,6 +19,8 @@ import { _homePlans } from 'src/_mock';
 
 import Iconify from 'src/components/iconify';
 import { varFade, MotionViewport } from 'src/components/animate';
+import { FormControl, InputLabel, MenuItem, Modal, Select } from '@mui/material';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 // ----------------------------------------------------------------------
 
@@ -26,6 +28,10 @@ export default function HomePricing() {
   const mdUp = useResponsive('up', 'md');
 
   const [currentTab, setCurrentTab] = useState('Standard');
+
+  
+
+  
 
   const handleChangeTab = useCallback((event: React.SyntheticEvent, newValue: string) => {
     setCurrentTab(newValue);
@@ -41,7 +47,7 @@ export default function HomePricing() {
 
       <m.div variants={varFade().inDown}>
         <Typography variant="h2">
-          The right plan for <br /> your business
+          The right plan for <br /> your Advertisements
         </Typography>
       </m.div>
 
@@ -127,7 +133,7 @@ export default function HomePricing() {
               color="inherit"
               size="large"
               variant="contained"
-              href="mailto:support@minimals.cc?subject=[Feedback] from Customer"
+              href="mailto:quickadshub@gmail.com?subject=[Feedback] from Customer"
             >
               Contact us
             </Button>
@@ -166,9 +172,35 @@ interface PlanCardProps extends StackProps {
 
 function PlanCard({ plan, sx, ...other }: PlanCardProps) {
   const { license, commons, options, icons } = plan;
-
+  const locationP = useLocation();  
+  const navigate = useNavigate();
+  const lastSegment = locationP.pathname.split('/').pop(); 
   const standardLicense = license === 'Standard';
+  const [vehicle, setVehicle] = useState('');
+  const [location, setLocation] = useState('');
+  const [open, setOpen] = useState(false);
+  const [subLocation, setSubLocation] = useState('');
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
+  const handleCreatePost = () => {
+    navigate(`/dashboard/posts/new/${lastSegment}/${vehicle}/${location}/${subLocation}`);
+  }
+
+
+  const modalStyle = {
+    position: 'absolute' as const,
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: 400,
+    bgcolor: 'background.paper',
+    border: '2px solid #000',
+    boxShadow: 24,
+    p: 4,
+    borderRadius: 2,
+  };
+  
   const plus = license === 'Standard Plus';
 
   return (
@@ -254,16 +286,54 @@ function PlanCard({ plan, sx, ...other }: PlanCardProps) {
 
       <Stack alignItems="flex-end">
         <Button
+       onClick={handleOpen}
           color="inherit"
           size="small"
-          target="_blank"
-          rel="noopener"
-          href={paths.minimalUI}
+       
           endIcon={<Iconify icon="eva:arrow-ios-forward-fill" />}
         >
-          Learn more
+          Select
         </Button>
       </Stack>
+            {/* Popup Modal */}
+            <Modal open={open} onClose={handleClose}>
+        <Box sx={modalStyle}>
+          <Typography variant="h6" sx={{ mb: 2 }}>
+            Select Details
+          </Typography>
+
+          <FormControl fullWidth sx={{ mb: 2 }}>
+            <InputLabel>Select a Vehicle</InputLabel>
+            <Select value={vehicle} onChange={(e) => setVehicle(e.target.value)}>
+              <MenuItem value="Car">Car</MenuItem>
+              <MenuItem value="Bike">Bike</MenuItem>
+              <MenuItem value="Truck">Truck</MenuItem>
+            </Select>
+          </FormControl>
+
+          <FormControl fullWidth sx={{ mb: 2 }}>
+            <InputLabel>Select a Location</InputLabel>
+            <Select value={location} onChange={(e) => setLocation(e.target.value)}>
+              <MenuItem value="Colombo">Colombo</MenuItem>
+              <MenuItem value="Kandy">Kandy</MenuItem>
+              <MenuItem value="Galle">Galle</MenuItem>
+            </Select>
+          </FormControl>
+
+          <FormControl fullWidth sx={{ mb: 2 }}>
+            <InputLabel>Select a Sub-Location</InputLabel>
+            <Select value={subLocation} onChange={(e) => setSubLocation(e.target.value)}>
+              <MenuItem value="Central">Central</MenuItem>
+              <MenuItem value="North">North</MenuItem>
+              <MenuItem value="South">South</MenuItem>
+            </Select>
+          </FormControl>
+
+          <Button variant="contained" onClick={handleCreatePost}>
+            Next
+          </Button>
+        </Box>
+      </Modal>
     </Stack>
   );
 }

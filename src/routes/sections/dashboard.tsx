@@ -64,6 +64,8 @@ const BlankPage = lazy(() => import('src/pages/dashboard/blank'));
 
 // Create Ads
 
+
+const AdminAccess = lazy(() => import('src/pages/dashboard/admin-access'));
 // yourAdvertisement
 
 const YourAdvertisement = lazy(() => import('src/pages/dashboard/showYourAdd'));
@@ -196,7 +198,12 @@ export const dashboardRoutes = [
           { path: ':id/edit', element: <TourEditPage /> },
         ],
       },
-
+      {
+        path: 'adminAccess',
+        children: [
+          { element: <AdminAccess />, index: true },
+        ],
+      },
       {
         path: 'yourAdvertisement',
         children: [

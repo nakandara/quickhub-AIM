@@ -67,11 +67,11 @@ export function useNavData() {
             path: paths.dashboard.general.ecommerce,
             icon: ICONS.ecommerce,
           },
-          {
-            title: t('analytics'),
-            path: paths.dashboard.general.analytics,
-            icon: ICONS.analytics,
-          },
+          // {
+          //   title: t('analytics'),
+          //   path: paths.dashboard.general.analytics,
+          //   icon: ICONS.analytics,
+          // },
           {
             title: t('banking'),
             path: paths.dashboard.general.banking,
@@ -86,6 +86,11 @@ export function useNavData() {
             title: t('file'),
             path: paths.dashboard.general.file,
             icon: ICONS.file,
+          },
+          {
+            title: t('admin-Access'),
+            path: paths.dashboard.adminAccess.root,
+            icon: ICONS.analytics,
           },
         ],
       },

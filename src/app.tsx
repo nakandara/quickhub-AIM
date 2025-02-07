@@ -41,7 +41,7 @@ export default function App() {
   `;
 
   console.info(`%c${charAt}`, 'color: #5BE49B');
-  const socket = io('https://worldadd-api.vercel.app'); // Replace with your server URL
+  const socket = io('http://localhost:8080'); // Replace with your server URL
 
   // Example: Listen for a backend-initiated message
   socket.on('backend_message', (data) => {

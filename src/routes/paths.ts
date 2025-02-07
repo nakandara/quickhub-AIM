@@ -175,6 +175,9 @@ export const paths = {
         details: `${ROOTS.DASHBOARD}/order/${MOCK_ID}`,
       },
     },
+    adminAccess: {
+      root: `${ROOTS.DASHBOARD}/adminAccess`,
+    },
     adds: {
       root: `${ROOTS.DASHBOARD}/adds`,
     
