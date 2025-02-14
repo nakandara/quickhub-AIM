@@ -133,7 +133,7 @@ export default function HomeHugePackElements() {
       }}
     >
       {/* Row 1 */}
-      <Stack
+      {/* <Stack
         direction="row"
         flexWrap="wrap"
         alignItems="center"
@@ -170,10 +170,10 @@ export default function HomeHugePackElements() {
         <m.div variants={varFade().in}>
           <CircularProgress color="error" />
         </m.div>
-      </Stack>
+      </Stack> */}
 
       {/* Row 2 */}
-      <Stack
+      {/* <Stack
         direction="row"
         flexWrap="wrap"
         alignItems="center"
@@ -234,10 +234,10 @@ export default function HomeHugePackElements() {
             label="Chip"
           />
         </m.div>
-      </Stack>
+      </Stack> */}
 
       {/* Row 3 */}
-      <Stack
+      {/* <Stack
         direction="row"
         flexWrap="wrap"
         alignItems="center"
@@ -273,10 +273,10 @@ export default function HomeHugePackElements() {
             Label
           </Label>
         </m.div>
-      </Stack>
+      </Stack> */}
 
       {/* Row 4 */}
-      <Stack
+      {/* <Stack
         spacing={{ xs: 3, md: 4 }}
         sx={{
           width: 1,
@@ -301,7 +301,7 @@ export default function HomeHugePackElements() {
             This is a success alert — <strong>check it out!</strong>
           </Alert>
         </m.div>
-      </Stack>
+      </Stack> */}
 
       {mdUp && (
         <>
@@ -373,7 +373,7 @@ export default function HomeHugePackElements() {
                   }
                   titleTypographyProps={{
                     typography: 'subtitle2',
-                    sx: { mb: 0.25 },
+                    sx: { mb: 0.20 },
                   }}
                   subheaderTypographyProps={{ typography: 'caption' }}
                   sx={{ p: 2 }}
@@ -381,7 +381,7 @@ export default function HomeHugePackElements() {
                 <Box sx={{ px: 1 }}>
                   <Image
                     alt="cover-url"
-                    src={_mock.image.cover(12)}
+                    src='https://firebasestorage.googleapis.com/v0/b/datamithurunode.appspot.com/o/profilePhotos%2F%E2%80%94Pngtree%E2%80%94cute%203d%20boy%20with%20an_14053806.png?alt=media&token=b768395e-01ab-4ce2-9d68-65d306d22bc6'
                     ratio="16/9"
                     sx={{
                       borderRadius: 1.5,

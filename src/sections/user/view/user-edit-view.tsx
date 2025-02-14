@@ -37,7 +37,7 @@ export default function UserEditView({ id }: Props) {
     }
   }, [user?.userId]);
 
-  console.log(currentUser,'ooooooooooo');
+  console.log(user?.userId,'ooooooooooo');
   
 
   return (

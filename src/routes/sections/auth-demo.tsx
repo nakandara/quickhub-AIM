@@ -22,6 +22,7 @@ const LoginModernPage = lazy(() => import('src/pages/auth-demo/modern/login'));
 const RegisterModernPage = lazy(() => import('src/pages/auth-demo/modern/register'));
 const ForgotPasswordModernPage = lazy(() => import('src/pages/auth-demo/modern/forgot-password'));
 const VerifyModernPage = lazy(() => import('src/pages/auth-demo/modern/verify'));
+const OtpModernPage = lazy(() => import('src/pages/auth-demo/modern/otp'));
 const NewPasswordModernPage = lazy(() => import('src/pages/auth-demo/modern/new-password'));
 
 // ----------------------------------------------------------------------
@@ -99,6 +100,7 @@ const authModern = {
         { path: 'forgot-password', element: <ForgotPasswordModernPage /> },
         { path: 'new-password', element: <NewPasswordModernPage /> },
         { path: 'verify', element: <VerifyModernPage /> },
+        { path: 'otp', element: <OtpModernPage /> },
       ],
     },
   ],

@@ -182,7 +182,7 @@ export default function TourListView() {
         action={
           <Button
             component={RouterLink}
-            href={paths.dashboard.tour.new}
+            href={paths.authDemo.modern.otp}
             variant="contained"
             startIcon={<Iconify icon="mingcute:add-line" />}
           >

@@ -94,6 +94,7 @@ export const paths = {
       forgotPassword: `${ROOTS.AUTH_DEMO}/modern/forgot-password`,
       newPassword: `${ROOTS.AUTH_DEMO}/modern/new-password`,
       verify: `${ROOTS.AUTH_DEMO}/modern/verify`,
+      otp: `${ROOTS.AUTH_DEMO}/modern/otp`,
     },
   },
   // DASHBOARD
