@@ -88,6 +88,9 @@ export type IUserCard = {
   id: string;
   name: string;
   role: string;
+  content1:string;
+  content2:string;
+  content3:string;
   coverUrl: string;
   avatarUrl: string;
   totalPosts: number;

@@ -27,7 +27,7 @@ type Props = {
 export default function UserCard({ user }: Props) {
   const theme = useTheme();
 
-  const { name, coverUrl, role, totalFollowers, totalPosts, avatarUrl, totalFollowing } = user;
+  const { name, coverUrl, role,content1, totalFollowers, totalPosts, avatarUrl, totalFollowing } = user;
   console.log(coverUrl,'oo');
   
 

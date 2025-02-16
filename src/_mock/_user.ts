@@ -89,7 +89,10 @@ export const _userFeeds = [...Array(3)].map((_, index) => ({
 export const _userCards = [...Array(21)].map((_, index) => ({
   id: _mock.id(index),
   role: _mock.role(index),
-  name: _mock.fullName(index),
+  content1: _mock.role(index),
+  content2: _mock.role(index),
+  content3: _mock.role(index),
+  name: _mock.role(index),
   coverUrl: _mock.image.cover(index),
   avatarUrl: _mock.image.avatar(index),
   totalFollowers: _mock.number.nativeL(index),

@@ -16,7 +16,7 @@ import PlaneCardList from '../pale-card-list';
 const users = [
     {
       id: "e99f09a7-dd88-49d5-b1c8-1daf80c2d7b1",
-      avatarUrl: "https://worldadd-api.vercel.app/assets/images/avatar/avatar_1.jpg",
+      avatarUrl: "https://firebasestorage.googleapis.com/v0/b/datamithurunode.appspot.com/o/profilePhotos%2FLeonardo_Phoenix_09_Create_a_modern_illustration_of_a_sleek_hi_3.jpg?alt=media&token=265f451f-783b-4646-9579-fb19d50e4154",
       coverUrl: "https://worldadd-api.vercel.app/assets/images/cover/cover_1.jpg",
       name: "silver",
       role: "HR Manager",
