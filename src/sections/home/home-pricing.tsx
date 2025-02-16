@@ -172,14 +172,14 @@ interface PlanCardProps extends StackProps {
 
 function PlanCard({ plan, sx, ...other }: PlanCardProps) {
   const { license, commons, options, icons } = plan;
-  const locationP = useLocation();  
+  const locationP = useLocation();
   const navigate = useNavigate();
-  const lastSegment = locationP.pathname.split('/').pop(); 
+  const lastSegment = locationP.pathname.split('/').pop();
   const standardLicense = license === 'Standard';
   const [vehicle, setVehicle] = useState('');
-  const [location, setLocation] = useState('');
   const [open, setOpen] = useState(false);
-  const [subLocation, setSubLocation] = useState('');
+  const [location, setLocation] = useState<string>("");
+  const [subLocation, setSubLocation] = useState<string>("");
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
@@ -200,8 +200,166 @@ function PlanCard({ plan, sx, ...other }: PlanCardProps) {
     p: 4,
     borderRadius: 2,
   };
-  
+
   const plus = license === 'Standard Plus';
+
+  const vehicleTypes = [
+    "Car", "Bike", "Truck", "Bus", "Van", "SUV", "Pickup", "Tractor",
+    "Jeep", "Lorry", "Motorcycle", "Scooter", "Minivan", "Convertible",
+    "Coupe", "Hatchback", "Sedan", "Wagon", "Electric", "Hybrid"
+  ];
+
+  const subLocations = {
+    'Colombo': [
+      "Angoda", "Athurugiriya", "Avissawella", "Battaramulla", "Boralesgamuwa",
+      "Colombo 1", "Colombo 2", "Colombo 3", "Colombo 4", "Colombo 5",
+      "Colombo 6", "Colombo 7", "Colombo 8", "Colombo 9", "Colombo 10",
+      "Colombo 11", "Colombo 12", "Colombo 13", "Colombo 14", "Colombo 15",
+      "Dehiwala", "Godagama", "Hanwella", "Homagama", "Kaduwela",
+      "Kesbewa", "Kohuwala", "Kolonnawa", "Kottawa", "Kotte",
+      "Maharagama", "Malabe", "Meegoda", "Moratuwa", "Mount Lavinia",
+      "Nawala", "Nugegoda", "Padukka", "Pannipitiya", "Piliyandala",
+      "Rajagiriya", "Ratmalana", "Talawatugoda", "Wellampitiya"
+    ],
+    'Gampaha': [
+      "Negombo", "Kadawatha", "Kiribathgoda", "Nittambuwa", "Ragama",
+      "Wattala", "Ja-Ela", "Gampaha", "Mirigama", "Veyangoda",
+      "Minuwangoda", "Divulapitiya", "Attanagalla", "Biyagama", "Katana"
+    ],
+    'Kalutara': [
+      "Panadura", "Kalutara South", "Kalutara North", "Beruwala",
+      "Wadduwa", "Horana", "Aluthgama", "Matugama", "Bandaragama",
+      "Millaniya", "Agalawatta", "Bulathsinhala", "Dodangoda", "Palindanuwara"
+    ],
+    'Kandy': [
+      "Peradeniya", "Katugastota", "Digana", "Gampola", "Nawalapitiya",
+      "Pilimathalawa", "Kadugannawa", "Kundasale", "Akurana", "Galagedara",
+      "Harispattuwa", "Pathadumbara", "Udunuwara", "Yatinuwara"
+    ],
+    'Matale': [
+      "Dambulla", "Ukuwela", "Rattota", "Galewela", "Pallepola",
+      "Sigiriya", "Yatawatta", "Matale", "Naula", "Palapathwela",
+      "Raththota", "Wilgamuwa"
+    ],
+    'Nuwara_Eliya': [
+      "Hatton", "Nanu Oya", "Talawakele", "Ragala", "Walapane",
+      "Maskeliya", "Haputale", "Nuwara_Eliya", "Ambagamuwa", "Kotagala",
+      "Lindula", "Agarapathana", "Dayagama", "Bogawantalawa"
+    ],
+    'Galle': [
+      "Hikkaduwa", "Unawatuna", "Karapitiya", "Baddegama", "Ambalangoda",
+      "Bentota", "Elpitiya", "Galle", "Ahangama", "Balapitiya",
+      "Habaraduwa", "Imaduwa", "Nagoda", "Thalagaha"
+    ],
+    'Matara': [
+      "Weligama", "Akurugoda", "Athuraliya", "Hakmana", "Devinuwara",
+      "Kamburupitiya", "Dickwella", "Matara", "Akuressa", "Kottegoda",
+      "Malimbada", "Pitabeddara", "Thihagoda", "Weligatta"
+    ],
+    'Hambantota': [
+      "Tangalle", "Tissamaharama", "Ambalantota", "Weeraketiya",
+      "Beliatta", "Walasmulla", "Sooriyawewa", "Hambantota", "Angunukolapelessa",
+      "Katuwana", "Lunugamvehera", "Okewela", "Ranna", "Siththamparanthota"
+    ],
+    'Jaffna': [
+      "Chavakachcheri", "Point Pedro", "Nallur", "Kopay", "Karainagar",
+      "Velanai", "Kankesanthurai", "Jaffna", "Chankanai", "Delft",
+      "Maruthnkerny", "Nelliady", "Sandilipay", "Tellippalai"
+    ],
+    'Kilinochchi': [
+      "Poonakari", "Karachchi", "Pallai", "Kandawalai", "Paranthan",
+      "Murukandy", "Kilinochchi Town", "Kilinochchi", "Kandavalai",
+      "Pachchilaipalli", "Poonakary", "Sinhapura", "Vannerikulam"
+    ],
+    'Mannar': [
+      "Madhu", "Musali", "Nanattan", "Manthai West", "Manthai East",
+      "Vavuniya South", "Adampan", "Mannar", "Nanaddan", "Tharapuram",
+      "Thalvupadu", "Uyilankulam", "Vellankulam", "Vidataltivu"
+    ],
+    'Vavuniya': [
+      "Nedunkerny", "Vavuniya South", "Vavuniya North", "Vengalacheddikulam",
+      "Settikulam", "Omanthai", "Cheddikulam", "Vavuniya", "Poovarasankulam",
+      "Pampaimadu", "Periyakulam", "Puliyankulam", "Sivapuram", "Thandikulam"
+    ],
+    'Mullaitivu': [
+      "Puthukkudiyiruppu", "Thunukkai", "Oddusuddan", "Mallavi",
+      "Mullaitivu Town", "Maritimepattu", "Manthai East", "Mullaitivu",
+      "Alampil", "Kokkuthuduwai", "Kumulamunai", "Nayaru", "Puthukudiyiruppu",
+      "Visvamadu"
+    ],
+    'Batticaloa': [
+      "Kattankudy", "Eravur", "Valaichchenai", "Kaluwanchikudy",
+      "Arayampathy", "Vavunathivu", "Oddamavadi", "Batticaloa", "Chenkalady",
+      "Kiran", "Kurukkalmadam", "Mankerny", "Paddippalai", "Vakarai"
+    ],
+    'Trincomalee': [
+      "Kinniya", "Muttur", "Kuchchaveli", "Kantalai", "Seruvila",
+      "Pulmoddai", "Sampur", "Trincomalee", "Gomarankadawala", "Kinniya",
+      "Kuchchaveli", "Morawewa", "Nilaveli", "Thambalagamuwa"
+    ],
+    'Ampara': [
+      "Akkaraipattu", "Sammanthurai", "Kalmunai", "Uhana",
+      "Dehiattakandiya", "Pottuvil", "Addalachchenai", "Ampara",
+      "Damana", "Karaitivu", "Mahaoya", "Navithanveli", "Padiyatalawa",
+      "Sainthamaruthu"
+    ],
+    'Badulla': [
+      "Bandarawela", "Welimada", "Ella", "Hali-Ela", "Mahiyanganaya",
+      "Passara", "Haputale", "Badulla", "Kandaketiya", "Lunugala",
+      "Meegahakivula", "Rideemaliyadda", "Soranathota", "Uva Paranagama"
+    ],
+    'Monaragala': [
+      "Wellawaya", "Bibile", "Medagama", "Madulla", "Siyambalanduwa",
+      "Buttala", "Kataragama", "Monaragala", "Badalkumbura", "Koslanda",
+      "Okkampitiya", "Sevanagala", "Thanamalvila", "Wedikumbura"
+    ],
+    'Anuradhapura': [
+      "Kekirawa", "Eppawala", "Mihintale", "Medawachchiya",
+      "Tambuttegama", "Thirappane", "Nochchiyagama", "Anuradhapura",
+      "Galenbindunuwewa", "Horowpothana", "Ipalogama", "Kahatagasdigiliya",
+      "Kebithigollewa", "Nachchadoowa"
+    ],
+    'Polonnaruwa': [
+      "Medirigiriya", "Hingurakgoda", "Dimbulagala", "Elahera",
+      "Welikanda", "Giritale", "Aralaganwila", "Polonnaruwa",
+      "Lankapura", "Thamankaduwa", "Welikanda", "Dimbulagala",
+      "Hingurakgoda", "Medirigiriya"
+    ],
+    'Puttalam': [
+      "Chilaw", "Wennappuwa", "Anamaduwa", "Marawila",
+      "Nattandiya", "Pallama", "Dankotuwa", "Puttalam",
+      "Arachchikattuwa", "Kalpitiya", "Karuwalagaswewa",
+      "Mundalama", "Nawagattegama", "Vanathavilluwa"
+    ],
+    'Kurunegala': [
+      "Ibbagamuwa", "Mawathagama", "Kuliyapitiya", "Pannala",
+      "Polgahawela", "Alawwa", "Narammala", "Kurunegala",
+      "Bingiriya", "Galgamuwa", "Ganewatta", "Giribawa",
+      "Mallawapitiya", "Nikaweratiya"
+    ],
+    'Ratnapura': [
+      "Pelmadulla", "Kuruwita", "Balangoda", "Embilipitiya",
+      "Godakawela", "Kalawana", "Eheliyagoda", "Ratnapura",
+      "Ayagama", "Kiriella", "Nivithigala", "Opanayaka",
+      "Rakwana", "Weligepola"
+    ],
+    'Kegalle': [
+      "Mawanella", "Warakapola", "Rambukkana", "Deraniyagala",
+      "Bulathkohupitiya", "Aranayaka", "Yatiyanthota", "Kegalle",
+      "Dehiowita", "Galigamuwa", "Kitulgala", "Ruwanwella",
+      "Thulhiriya", "Weligamuwa"
+    ]
+  };
+
+
+  const handleLocationChange = (e: any) => {
+    setLocation(e.target.value);
+    setSubLocation(""); // Reset sub-location when city changes
+  };
+
+  const handleSubLocationChange = (e: any) => {
+    setSubLocation(e.target.value);
+  };
 
   return (
     <Stack
@@ -219,7 +377,7 @@ function PlanCard({ plan, sx, ...other }: PlanCardProps) {
     >
       <Stack spacing={2}>
         <Typography variant="overline" component="div" sx={{ color: 'text.disabled' }}>
-          License
+          Payment Plans
         </Typography>
 
         <Box sx={{ position: 'relative' }}>
@@ -286,17 +444,17 @@ function PlanCard({ plan, sx, ...other }: PlanCardProps) {
 
       <Stack alignItems="flex-end">
         <Button
-       onClick={handleOpen}
+          onClick={handleOpen}
           color="inherit"
           size="small"
-       
+
           endIcon={<Iconify icon="eva:arrow-ios-forward-fill" />}
         >
           Select
         </Button>
       </Stack>
-            {/* Popup Modal */}
-            <Modal open={open} onClose={handleClose}>
+      {/* Popup Modal */}
+      <Modal open={open} onClose={handleClose}>
         <Box sx={modalStyle}>
           <Typography variant="h6" sx={{ mb: 2 }}>
             Select Details
@@ -305,27 +463,38 @@ function PlanCard({ plan, sx, ...other }: PlanCardProps) {
           <FormControl fullWidth sx={{ mb: 2 }}>
             <InputLabel>Select a Vehicle</InputLabel>
             <Select value={vehicle} onChange={(e) => setVehicle(e.target.value)}>
-              <MenuItem value="Car">Car</MenuItem>
-              <MenuItem value="Bike">Bike</MenuItem>
-              <MenuItem value="Truck">Truck</MenuItem>
+              {vehicleTypes.map((type) => (
+                <MenuItem key={type} value={type}>
+                  {type}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
 
           <FormControl fullWidth sx={{ mb: 2 }}>
             <InputLabel>Select a Location</InputLabel>
-            <Select value={location} onChange={(e) => setLocation(e.target.value)}>
-              <MenuItem value="Colombo">Colombo</MenuItem>
-              <MenuItem value="Kandy">Kandy</MenuItem>
-              <MenuItem value="Galle">Galle</MenuItem>
+            <Select value={location} onChange={handleLocationChange}>
+              {Object.keys(subLocations).map((city) => (
+                <MenuItem key={city} value={city}>
+                  {city}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
 
           <FormControl fullWidth sx={{ mb: 2 }}>
             <InputLabel>Select a Sub-Location</InputLabel>
-            <Select value={subLocation} onChange={(e) => setSubLocation(e.target.value)}>
-              <MenuItem value="Central">Central</MenuItem>
-              <MenuItem value="North">North</MenuItem>
-              <MenuItem value="South">South</MenuItem>
+            <Select
+              value={subLocation}
+              onChange={handleSubLocationChange}
+              disabled={!location} // Disable if no city is selected
+            >
+            {subLocations[location as keyof typeof subLocations]?.map((subLoc) => (
+  <MenuItem key={subLoc} value={subLoc}>
+    {subLoc}
+  </MenuItem>
+))}
+
             </Select>
           </FormControl>
 

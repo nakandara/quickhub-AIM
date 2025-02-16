@@ -73,6 +73,12 @@ export default function PlaneCard({ user,onClick }: Props) {
   const handleCreatePost = () => {
     navigate(`/dashboard/posts/new/${lastSegment}/${vehicle}/${location}/${subLocation}`);
   }
+
+  const vehicleTypes = [
+    "Car", "Bike", "Truck", "Bus", "Van", "SUV", "Pickup", "Tractor", 
+    "Jeep", "Lorry", "Motorcycle", "Scooter", "Minivan", "Convertible",
+    "Coupe", "Hatchback", "Sedan", "Wagon", "Electric", "Hybrid"
+  ];
   
   return (
     <>
