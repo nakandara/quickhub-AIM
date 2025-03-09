@@ -26,21 +26,25 @@ export type IUserProfileCover = {
   avatarUrl: string;
 };
 
-export type IUserProfile = {
-  id: string;
-  username:string,
-  role: string;
-  district:string;
-  gender:string;
-  quote: string;
-  email: string;
-  school: string;
+export interface IUserProfile {
+  _id: string;
+  userId: string;
+  username: string;
+  birthday: string;
+  district: string;
+  city: string;
   country: string;
-  company: string;
-  totalFollowers: number;
-  totalFollowing: number;
-  socialLinks: IUserSocialLink;
-};
+  email: string;
+  gender: string;
+  isVerified: boolean;
+  phoneNumber: string;
+  state: string;
+  status: string;
+  zipCode: string;
+  avatarUrl: string;
+  address: string;
+  __v: number;
+}
 
 export type IUserProfileFollower = {
   id: string;

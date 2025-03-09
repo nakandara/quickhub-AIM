@@ -149,10 +149,17 @@ export default function TourItem({ tour, onView, onEdit, onDelete }: Props) {
     label: `Fuel Type: ${fuelType}`,
     icon: <Iconify icon="solar:clock-circle-bold" sx={{ color: 'info.main' }} />,
   },
-  {
-    label: `${images.length} Booked`,
-    icon: <Iconify icon="solar:users-group-rounded-bold" sx={{ color: 'primary.main' }} />,
-  },
+{
+  label: `${images.length} Images`,
+  icon: (
+    <Iconify
+    icon="material-symbols:photo" // Material Icons equivalent
+    width={24}
+    sx={{ color: 'primary.main' }}
+  />
+  
+  ),
+}
 ]
 .map((item) => (
         <Stack

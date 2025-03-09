@@ -20,28 +20,28 @@ type Props = {
 
 export default function TourDetailsContent({ tour }: Props) {
   const {
-    title,
-    images,
-    description,
-    brand,
-    model,
-    plane,
-    bodyType,
-    category,
-    city,
-    createdAt,
-    mobileNumber,
-    price,
-    yearOfManufacture,
-    ratingNumber,
-    transmission,
-  } = tour;
+    title = '',
+    images = [],
+    description = '',
+    brand = '',
+    model = '',
+    plane = '',
+    bodyType = '',
+    category = '',
+    city = '',
+    createdAt = '',
+    mobileNumber = '',
+    price = '',
+    yearOfManufacture = '',
+    ratingNumber = '',
+    transmission = '',
+  } = tour || {};
 
-  const slides = images.map((image:any) => ({ src: image.imageUrl }));
-  
+  const slides = images?.map((image: any) => ({ src: image.imageUrl })) || [];
+
   const { selected: selectedImage, open: openLightbox, onOpen: handleOpenLightbox, onClose: handleCloseLightbox } = useLightBox(slides);
 
-  const renderGallery = (
+  const renderGallery = slides.length > 0 ? (
     <>
       <Box
         gap={1}
@@ -72,7 +72,7 @@ export default function TourDetailsContent({ tour }: Props) {
         </m.div>
 
         <Box gap={1} display="grid" gridTemplateColumns="repeat(2, 1fr)">
-          {slides.slice(1, 5).map((slide:any) => (
+          {slides.slice(1, 5).map((slide: any) => (
             <m.div
               key={slide.src}
               whileHover="hover"
@@ -100,7 +100,7 @@ export default function TourDetailsContent({ tour }: Props) {
         close={handleCloseLightbox}
       />
     </>
-  );
+  ) : null;
 
   const renderHead = (
     <>
