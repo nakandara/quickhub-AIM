@@ -26,7 +26,7 @@ export default function HomeDarkMode() {
 
       <m.div variants={varFade().inUp}>
         <Typography variant="h2" sx={{ color: 'common.white' }}>
-          Dark mode
+         Vehicles Add
         </Typography>
       </m.div>
 

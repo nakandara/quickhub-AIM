@@ -66,21 +66,21 @@ export default function HomeHugePackElements() {
     setSelect(event.target.value);
   }, []);
 
-  const viewAllBtn = (
-    <m.div variants={varFade().inUp}>
-      <Button
-        size="large"
-        color="inherit"
-        variant="outlined"
-        target="_blank"
-        rel="noopener"
-        href={paths.components}
-        endIcon={<Iconify icon="eva:arrow-ios-forward-fill" width={18} sx={{ ml: -0.5 }} />}
-      >
-        View All Components
-      </Button>
-    </m.div>
-  );
+const viewAllBtn = (
+  <m.div variants={varFade().inUp}>
+    <Button
+      size="large"
+      color="inherit"
+      variant="outlined"
+      target="_blank"
+      rel="noopener"
+      href={paths.dashboard.root} // Ensure this is a string
+      endIcon={<Iconify icon="eva:arrow-ios-forward-fill" width={18} sx={{ ml: -0.5 }} />}
+    >
+      Create Your Listing
+    </Button>
+  </m.div>
+);
 
   const renderDescription = (
     <Stack
@@ -104,17 +104,11 @@ export default function HomeHugePackElements() {
       </m.div>
 
       <m.div variants={varFade().inUp}>
-        <Typography
-          sx={{
-            mb: 5,
-            color: 'text.secondary',
-          }}
-        >
-          We collected most popular elements. Menu, sliders, buttons, inputs etc. are all here. Just
-          dive in!
-        </Typography>
-      </m.div>
-
+  <Typography sx={{ mb: 3, color: 'text.secondary' }}>
+    We&rsquo;ve gathered the most essential tools for creating eye-catching advertisements. Whether you&apos;re selling vehicles or properties, our menus, sliders, buttons, and input fields are designed to make your listings stand out. Dive in and start showcasing your listings today!
+  </Typography>
+ 
+</m.div>
       {mdUp && viewAllBtn}
     </Stack>
   );
@@ -314,33 +308,9 @@ export default function HomeHugePackElements() {
             spacing={{ xs: 3, md: 4 }}
             sx={{ width: 1 }}
           >
-            <m.div variants={varFade().in}>
-              <FormControlLabel control={<Switch defaultChecked />} label="Switch" sx={{ m: 0 }} />
-            </m.div>
-
-            <m.div variants={varFade().in}>
-              <FormControlLabel
-                control={<Radio color="error" defaultChecked />}
-                label="Radio Button"
-                sx={{ m: 0 }}
-              />
-            </m.div>
-
-            <m.div variants={varFade().in}>
-              <FormControlLabel
-                control={<Checkbox color="info" defaultChecked />}
-                label="Checkbox"
-                sx={{ m: 0 }}
-              />
-            </m.div>
-
-            <m.div variants={varFade().in}>
-              <FormControlLabel
-                control={<Checkbox color="warning" indeterminate />}
-                label="Indeterminate"
-                sx={{ m: 0 }}
-              />
-            </m.div>
+          
+Show Preview Add
+           
           </Stack>
 
           {/* Row 6 */}

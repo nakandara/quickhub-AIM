@@ -209,10 +209,9 @@ export default function HomeHero() {
       </m.div>
 
       <m.div variants={varFade().in}>
-        <Typography variant="body2" sx={{ textAlign: 'center' }}>
-          The starting point for your next project is based on MUI.Easy customization Helps you
-          build apps faster and better.
-        </Typography>
+      <Typography variant="body2" sx={{ textAlign: 'center' }}>
+  build vehicle and property sales advertisement apps faster and better.
+</Typography>
       </m.div>
 
       <m.div variants={varFade().in}>
@@ -310,8 +309,8 @@ export default function HomeHero() {
           alt={lightMode ? 'light_1' : 'dark_1'}
           src={
             lightMode
-              ? `/assets/images/home/hero/light_1.webp`
-              : `/assets/images/home/hero/dark_1.webp`
+              ? `/assets/images/home/hero/Mask group (4).png`
+              : `/assets/images/home/hero/Mask group (1).png`
           }
           sx={{ position: 'absolute', mt: -5 }}
         />
@@ -322,8 +321,8 @@ export default function HomeHero() {
           alt={lightMode ? 'light_1' : 'dark_1'}
           src={
             lightMode
-              ? `/assets/images/home/hero/light_1.webp`
-              : `/assets/images/home/hero/dark_1.webp`
+              ? `/assets/images/home/hero/Mask group (4).png`
+              : `/assets/images/home/hero/Mask group (1).png`
           }
           sx={{ position: 'absolute' }}
         />
@@ -341,8 +340,8 @@ export default function HomeHero() {
           alt={lightMode ? 'light_2' : 'dark_2'}
           src={
             lightMode
-              ? `/assets/images/home/hero/light_2.webp`
-              : `/assets/images/home/hero/dark_2.webp`
+              ? `/assets/images/home/hero/Mask group (7).png`
+              : `/assets/images/home/hero/Shop.png`
           }
           sx={{ position: 'absolute', mt: -5 }}
         />
@@ -353,8 +352,8 @@ export default function HomeHero() {
           alt={lightMode ? 'light_2' : 'dark_2'}
           src={
             lightMode
-              ? `/assets/images/home/hero/light_2.webp`
-              : `/assets/images/home/hero/dark_2.webp`
+              ? `/assets/images/home/hero/Mask group (7).png`
+              : `/assets/images/home/hero/Shop.png`
           }
           sx={{ position: 'absolute' }}
         />
