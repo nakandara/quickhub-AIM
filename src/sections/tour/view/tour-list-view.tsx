@@ -117,6 +117,8 @@ export default function TourListView() {
     [dataSource] 
   );
 
+  
+
   const renderFilters = (
     <Stack
       spacing={3}
@@ -179,16 +181,16 @@ export default function TourListView() {
           },
           { name: 'List' },
         ]}
-        action={
-          <Button
-            component={RouterLink}
-            href={paths.authDemo.modern.otp}
-            variant="contained"
-            startIcon={<Iconify icon="mingcute:add-line" />}
-          >
-            New Tour
-          </Button>
-        }
+        // action={
+        //   <Button
+        //     component={RouterLink}
+        //     href={paths.authDemo.modern.otp}
+        //     variant="contained"
+        //     startIcon={<Iconify icon="mingcute:add-line" />}
+        //   >
+        //     New Tour
+        //   </Button>
+        // }
         sx={{
           mb: { xs: 3, md: 5 },
         }}
@@ -207,7 +209,7 @@ export default function TourListView() {
 
       {notFound && <EmptyContent title="No Data" filled sx={{ py: 10 }} />}
 
-      <TourList tours={dataFiltered} />
+      <TourList tours={dataFiltered} /> {/* Pass the correct prop */}
     </Container>
   );
 }

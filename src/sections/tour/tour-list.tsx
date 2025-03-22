@@ -1,7 +1,8 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react'; // Add useEffect
 import Box from '@mui/material/Box';
 import Pagination, { paginationClasses } from '@mui/material/Pagination';
 import { paths } from 'src/routes/paths';
+import { useLocation } from 'react-router';
 import { useRouter } from 'src/routes/hooks';
 import { AdPost } from 'src/types/tour';
 import TourItem from './tour-item';
@@ -11,13 +12,18 @@ type Props = {
 };
 
 export default function TourList({ tours }: Props) {
-  console.log(tours, '000000000000000000000');
-
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
+    const location = useLocation();
+  const [posts, setPosts] = useState<AdPost[]>(tours); // Initialize state with tours
   const itemsPerPage = 8;
 
-  const paginatedTours = tours.slice(
+  // Sync posts state with tours prop
+  useEffect(() => {
+    setPosts(tours); // Update posts state whenever tours prop changes
+  }, [tours]);
+
+  const paginatedTours = posts.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -40,12 +46,12 @@ export default function TourList({ tours }: Props) {
     [router]
   );
 
-  const handleDelete = useCallback((id: string) => {
-    console.info('DELETE', id);
- 
+  // Callback function to handle post deletion
+  const handleDelete = useCallback((postId: string) => {
+    setPosts((prevTours) => prevTours.filter((tour) => tour._id !== postId));
   }, []);
 
-  if (tours.length === 0) {
+  if (posts.length === 0) {
     return <Box textAlign="center">No tours available</Box>;
   }
 
@@ -66,14 +72,14 @@ export default function TourList({ tours }: Props) {
             tour={tour}
             onView={() => handleView(tour._id || tour.id)}
             onEdit={() => handleEdit(tour._id || tour.id)}
-            onDelete={() => handleDelete(tour._id || tour.id)}
+            onDelete={() => handleDelete(tour._id)} // Pass the handleDelete callback
           />
         ))}
       </Box>
 
-      {tours.length > itemsPerPage && (
+      {posts.length > itemsPerPage && (
         <Pagination
-          count={Math.ceil(tours.length / itemsPerPage)}
+          count={Math.ceil(posts.length / itemsPerPage)}
           page={currentPage}
           onChange={handlePageChange}
           sx={{

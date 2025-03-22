@@ -82,6 +82,24 @@ export function useGetLatestPosts(title: string) {
       };
     }
   }
+
+  export async function deletePost(userId: string, postId: string) {
+    const URL = `${HOST_API}/api/deletePost/${userId}/${postId}`;
+  
+    try {
+      const response = await axios.delete(URL);
+      return {
+        success: true,
+        data: response.data,
+      };
+    } catch (error) {
+      console.error('Error deleting post:', error);
+      return {
+        success: false,
+        error: error.response?.data?.message || error.message,
+      };
+    }
+  }
   
   export function useGetUserPosts(userId: string) {
     

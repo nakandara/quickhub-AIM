@@ -41,20 +41,33 @@ export default function HomePricing() {
     <Stack spacing={3} sx={{ mb: 10, textAlign: 'center' }}>
       <m.div variants={varFade().inUp}>
         <Typography component="div" variant="overline" sx={{ mb: 2, color: 'text.disabled' }}>
-          pricing plans
+          Advertisement Plans
         </Typography>
       </m.div>
-
+  
       <m.div variants={varFade().inDown}>
         <Typography variant="h2">
-          The right plan for <br /> your Advertisements
+          The Right Plan for <br /> Your Vehicle and Property Ads
         </Typography>
       </m.div>
-
+  
       <m.div variants={varFade().inDown}>
         <Typography sx={{ color: 'text.secondary' }}>
-          Choose the perfect plan for your needs. Always flexible to grow
+          Boost your vehicle and property sales with premium listings, featured ads, and flexible plans tailored to your needs.
         </Typography>
+      </m.div>
+  
+      <m.div variants={varFade().inUp}>
+        <Button variant="contained" size="large" sx={{ mt: 3 }}>
+          Get Started
+        </Button>
+      </m.div>
+  
+      <m.div variants={varFade().inUp}>
+        <Stack direction="row" spacing={2} justifyContent="center" sx={{ mt: 3 }}>
+          <Iconify icon="mdi:car" width={40} height={40} />
+          <Iconify icon="mdi:home" width={40} height={40} />
+        </Stack>
       </m.div>
     </Stack>
   );
