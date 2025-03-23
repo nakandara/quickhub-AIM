@@ -130,7 +130,6 @@ export const dashboardRoutes = [
         path: 'adds',
         children: [
           { element: <CreateAddsPage />, index: true },
-         
         ],
       },
       {
@@ -144,26 +143,6 @@ export const dashboardRoutes = [
         ],
       },
       {
-        path: 'post',
-        children: [
-          { element: <BlogPostsPage />, index: true },
-          { path: 'list', element: <BlogPostsPage /> },
-          { path: ':title', element: <BlogPostPage /> },
-          { path: ':title/edit', element: <BlogEditPostPage /> },
-          { path: 'new', element: <BlogNewPostPage /> },
-        ],
-      },
-      {
-        path: 'post',
-        children: [
-          { element: <BlogPostsPage />, index: true },
-          { path: 'list', element: <BlogPostsPage /> },
-          { path: ':title', element: <BlogPostPage /> },
-          { path: ':title/edit', element: <BlogEditPostPage /> },
-          { path: 'new', element: <BlogNewPostPage /> },
-        ],
-      },
-      {
         path: 'job',
         children: [
           { element: <JobListPage />, index: true },
@@ -173,31 +152,7 @@ export const dashboardRoutes = [
           { path: ':id/edit', element: <JobEditPage /> },
         ],
       },
-      {
-        path: 'tour',
-        children: [
-          { element: <TourListPage />, index: true },
-          { path: 'list', element: <TourListPage /> },
-          { path: ':id', element: <TourDetailsPage /> },
-          { path: 'new', element: <TourCreatePage /> },
-          { path: ':id/edit', element: <TourEditPage /> },
-        ],
-      },
-      {
-        path: 'posts',
-        children: [
-          { element: <TourListPage />, index: true },
-          { path: 'list', element: <TourListPage /> },
-          { path: ':id', element: <TourDetailsPage /> },
-          { 
-            path: 'new/:lastSegment/:vehicle/:location/:subLocation', 
-            element: <TourCreatePage /> 
-          },
-          { path: 'category', element: <SelectCategoryPage /> },
-          { path: 'package/:name', element: <SelectPlanePage /> },
-          { path: ':id/edit', element: <TourEditPage /> },
-        ],
-      },
+     
       {
         path: 'adminAccess',
         children: [
@@ -207,11 +162,9 @@ export const dashboardRoutes = [
       {
         path: 'yourAdvertisement',
         children: [
-          { element: <YourAdvertisement/>, index: true },
-         
+          { element: <YourAdvertisement />, index: true },
         ],
       },
-      
       { path: 'file-manager', element: <FileManagerPage /> },
       { path: 'mail', element: <MailPage /> },
       { path: 'chat', element: <ChatPage /> },
@@ -219,6 +172,46 @@ export const dashboardRoutes = [
       { path: 'kanban', element: <KanbanPage /> },
       { path: 'permission', element: <PermissionDeniedPage /> },
       { path: 'blank', element: <BlankPage /> },
+    ],
+  },
+  // Define the posts route outside the AuthGuard
+  {
+    path: 'dashboard/posts',
+    element: (
+      <DashboardLayout>
+        <Suspense fallback={<LoadingScreen />}>
+          <Outlet />
+        </Suspense>
+      </DashboardLayout>
+    ),
+    children: [
+      { element: <TourListPage />, index: true },
+      { path: 'list', element: <TourListPage /> },
+      { path: ':id', element: <TourDetailsPage /> },
+      {
+        path: 'new/:lastSegment/:vehicle/:location/:subLocation',
+        element: <TourCreatePage />,
+      },
+      { path: 'category', element: <SelectCategoryPage /> },
+      { path: 'package/:name', element: <SelectPlanePage /> },
+      { path: ':id/edit', element: <TourEditPage /> },
+    ],
+  },
+  {
+    path: 'dashboard/tour',
+    element: (
+      <DashboardLayout>
+        <Suspense fallback={<LoadingScreen />}>
+          <Outlet />
+        </Suspense>
+      </DashboardLayout>
+    ),
+    children: [
+      { element: <TourListPage />, index: true },
+      { path: 'list', element: <TourListPage /> },
+      { path: ':id', element: <TourDetailsPage /> }, // Accessible without login
+      { path: 'new', element: <TourCreatePage /> }, // Accessible without login
+      { path: ':id/edit', element: <TourEditPage /> }, // Accessible without login
     ],
   },
 ];
