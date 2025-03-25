@@ -280,7 +280,7 @@ function PlanCard({ plan, sx, ...other }: PlanCardProps) {
       "Maruthnkerny", "Nelliady", "Sandilipay", "Tellippalai"
     ],
     'Kilinochchi': [
-      "Poonakari", "Karachchi", "Pallai", "Kandawalai", "Paranthan",
+      "Poonaka-ri", "Karachchi", "Pallai", "Kandawalai", "Paranthan",
       "Murukandy", "Kilinochchi Town", "Kilinochchi", "Kandavalai",
       "Pachchilaipalli", "Poonakary", "Sinhapura", "Vannerikulam"
     ],

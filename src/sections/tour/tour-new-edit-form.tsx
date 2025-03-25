@@ -2,6 +2,7 @@ import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, Controller } from 'react-hook-form';
 import { useMemo, useEffect, useCallback, useState } from 'react';
+import { useParams } from "react-router-dom";
 
 import Chip from '@mui/material/Chip';
 import Card from '@mui/material/Card';
@@ -56,10 +57,15 @@ console.log(city,'ooooooo');
 
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
   const [uploading, setUploading] = useState(false);
-
+  const { id } = useParams(); 
   const mdUp = useResponsive('up', 'md');
 
   const { enqueueSnackbar } = useSnackbar();
+  
+
+  console.log(currentTour,'888888888888888');
+  
+  const selectedTour = Array.isArray(currentTour) ? currentTour.find((tour) => tour._id === "67df10845e53a040df48dff9") : null;
 
   const NewTourSchema = Yup.object().shape({
     userId: Yup.string().required('User ID is required'),
@@ -98,25 +104,25 @@ console.log(city,'ooooooo');
   const defaultValues = useMemo(
     () => ({
       userId: user?._id || '',
-      title: currentTour?.title || '',
-      price: currentTour?.price || '',
-      bodyType: currentTour?.bodyType || '',
-      city: currentTour?.city || '',
-      brand:currentTour?.brand || '',
-      description: currentTour?.content || '',
-      images: currentTour?.images || [],
-      fuelType: currentTour?.fuelType || [],
-      transmission: currentTour?.transmission || [],
-      tags: currentTour?.tags || [],
-      yearOfManufacture: currentTour?.durations || '',
-      engineCapacity: currentTour?.engineCapacity || '',
-      mileage: currentTour?.mileage || '', // New field
-      destination: currentTour?.destination || '',
-      services: currentTour?.services || [],
-      mobileNumber: currentTour?.mobileNumber || '', 
-      whatsappNumber:currentTour?.mobileNumber || '', 
+      title: selectedTour?.title || '',
+      price: selectedTour?.price || '',
+      bodyType: selectedTour?.bodyType || '',
+      city: selectedTour?.city || '',
+      brand:selectedTour?.brand || '',
+      description: selectedTour?.content || '',
+      images: selectedTour?.images || [],
+      fuelType: selectedTour?.fuelType || [],
+      transmission: selectedTour?.transmission || [],
+      tags: selectedTour?.tags || [],
+      yearOfManufacture: selectedTour?.durations || '',
+      engineCapacity: selectedTour?.engineCapacity || '',
+      mileage: selectedTour?.mileage || '', // New field
+      destination: selectedTour?.destination || '',
+      services: selectedTour?.services || [],
+      mobileNumber: selectedTour?.mobileNumber || '', 
+      whatsappNumber:selectedTour?.mobileNumber || '', 
     }),
-    [currentTour, user]
+    [selectedTour, user]
   );
 
   const methods = useForm<any>({
