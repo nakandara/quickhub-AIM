@@ -1,6 +1,6 @@
 import orderBy from 'lodash/orderBy';
-import { useState, useCallback } from 'react';
-import { useLocation } from 'react-router';
+import { useState, useCallback,useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
@@ -19,6 +19,7 @@ import Iconify from 'src/components/iconify';
 import EmptyContent from 'src/components/empty-content';
 import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
+import { useGetOtp } from 'src/api/otp';
 
 import { useMockedUser } from 'src/hooks/use-mocked-user';
 
@@ -48,11 +49,16 @@ export default function TourListView() {
   const { user } = useMockedUser();
   const openFilters = useBoolean();
   const location = useLocation();
+  const navigate = useNavigate();
   const currentPath = location.pathname.split('/').pop();
 
   const [sortBy, setSortBy] = useState('latest');
 
   const { userPosts } = useGetUserPosts(user?.userId);
+   const { otpData, otpDataLoading } = useGetOtp(user?.userId);
+   const isVerified = otpData?.some((otp: { veryOTP: any; }) => otp.veryOTP);
+
+   
 
   const [search, setSearch] = useState<{ query: string; results: any }>({
     query: '',
@@ -117,7 +123,24 @@ export default function TourListView() {
     [dataSource] 
   );
 
-  
+  useEffect(() => {
+    const isOtpPage = location.pathname.includes('otp');
+    const shouldRedirect = 
+      !otpDataLoading && 
+      currentPath === 'yourAdvertisement' && 
+      !isVerified && 
+      !isOtpPage;
+
+    if (shouldRedirect) {
+      navigate(paths.authDemo.modern.otp);
+    }
+  }, [isVerified, otpDataLoading, currentPath, navigate, location.pathname]);
+
+  // If loading or should redirect, return null
+  if (otpDataLoading || (currentPath === 'yourAdvertisement' && !isVerified)) {
+    return null; // or return a loading spinner
+  }
+
 
   const renderFilters = (
     <Stack

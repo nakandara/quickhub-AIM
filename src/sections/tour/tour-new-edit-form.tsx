@@ -34,7 +34,6 @@ import FormProvider, {
   RHFMultiCheckbox,
 } from 'src/components/hook-form';
 
-import { ITourItem, ITourGuide } from 'src/types/tour';
 import { useMockedUser } from 'src/hooks/use-mocked-user';
 import { createPost } from 'src/api/post';
 import { Box } from '@mui/system';
@@ -109,12 +108,12 @@ console.log(city,'ooooooo');
       bodyType: selectedTour?.bodyType || '',
       city: selectedTour?.city || '',
       brand:selectedTour?.brand || '',
-      description: selectedTour?.content || '',
+      description: selectedTour?.description || '',
       images: selectedTour?.images || [],
       fuelType: selectedTour?.fuelType || [],
       transmission: selectedTour?.transmission || [],
       tags: selectedTour?.tags || [],
-      yearOfManufacture: selectedTour?.durations || '',
+      yearOfManufacture: selectedTour?.yearOfManufacture || '',
       engineCapacity: selectedTour?.engineCapacity || '',
       mileage: selectedTour?.mileage || '', // New field
       destination: selectedTour?.destination || '',
@@ -165,20 +164,6 @@ console.log(city,'ooooooo');
   });
   
 
-  // const handleDrop = useCallback(
-  //   (acceptedFiles: File[]) => {
-  //     const files = values.images || [];
-
-  //     const newFiles = acceptedFiles.map((file) =>
-  //       Object.assign(file, {
-  //         preview: URL.createObjectURL(file),
-  //       })
-  //     );
-
-  //     setValue('images', [...files, ...newFiles], { shouldValidate: true });
-  //   },
-  //   [setValue, values.images]
-  // );
 
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {

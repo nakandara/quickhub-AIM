@@ -121,3 +121,21 @@ export function useGetLatestPosts(title: string) {
   
     return memoizedValue;
   }
+
+  export async function editPost(postId: string, postData: Record<string, any>) {
+    const URL = `${HOST_API}/api/editPost/${postId}`;
+  
+    try {
+      const response = await axios.put(URL, postData);
+      return {
+        success: true,
+        data: response.data,
+      };
+    } catch (error: any) {
+      console.error('Error editing post:', error);
+      return {
+        success: false,
+        error: error.response?.data?.message || error.message,
+      };
+    }
+  }
