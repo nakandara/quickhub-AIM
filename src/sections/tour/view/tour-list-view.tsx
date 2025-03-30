@@ -1,5 +1,5 @@
 import orderBy from 'lodash/orderBy';
-import { useState, useCallback,useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
@@ -11,7 +11,7 @@ import { RouterLink } from 'src/routes/components';
 import { useBoolean } from 'src/hooks/use-boolean';
 
 import { isAfter, isBetween } from 'src/utils/format-time';
-import { useGetUserPosts,useGetVerifiedPosts } from 'src/api/post';
+import { useGetUserPosts, useGetVerifiedPosts } from 'src/api/post';
 import { countries } from 'src/assets/data';
 import { _tourGuides, TOUR_SORT_OPTIONS, TOUR_SERVICE_OPTIONS } from 'src/_mock';
 
@@ -23,7 +23,7 @@ import { useGetOtp } from 'src/api/otp';
 
 import { useMockedUser } from 'src/hooks/use-mocked-user';
 
-import {AdPost ,ITourFilters } from 'src/types/tour';
+import { AdPost, ITourFilters } from 'src/types/tour';
 
 import TourList from '../tour-list';
 import TourSort from '../tour-sort';
@@ -55,12 +55,10 @@ export default function TourListView() {
   const [sortBy, setSortBy] = useState('latest');
 
   const { userPosts } = useGetUserPosts(user?.userId);
-   const { otpData, otpDataLoading } = useGetOtp(user?.userId);
-   const isVerified = otpData?.some((otp: { veryOTP: any; }) => otp.veryOTP);
+  const { otpData, otpDataLoading } = useGetOtp(user?.userId);
+  const isVerified = otpData?.some((otp: { veryOTP: any }) => otp.veryOTP);
 
-   
-
-  const [search, setSearch] = useState<{ query: string; results: any }>({
+  const [search, setSearch] = useState<{ query: string; results: any[] }>({
     query: '',
     results: [],
   });
@@ -69,11 +67,19 @@ export default function TourListView() {
 
   const dateError = isAfter(filters.startDate, filters.endDate);
 
+  // Properly extract data array from API responses
+  const verifiedPostsData = verifiedPosts?.data || [];
+
+  
+  const userPostsData = userPosts|| [];
+
+  
+
   // Decide which data to use based on the currentPath
-  const dataSource = currentPath === 'yourAdvertisement' ? userPosts : verifiedPosts;
+  const dataSource = currentPath === 'yourAdvertisement' ? verifiedPosts : userPostsData;
 
   const dataFiltered = applyFilter({
-    inputData: dataSource, // Use the selected data source here
+    inputData: dataSource,
     filters,
     sortBy,
     dateError,
@@ -110,8 +116,8 @@ export default function TourListView() {
       }));
 
       if (inputValue) {
-        const results = dataSource.filter((tour: any) =>
-          tour.model.toLowerCase().includes(inputValue.toLowerCase())
+        const results = dataSource.filter((tour:any) =>
+          tour.model?.toLowerCase().includes(inputValue.toLowerCase())
         );
 
         setSearch((prevState) => ({
@@ -120,15 +126,15 @@ export default function TourListView() {
         }));
       }
     },
-    [dataSource] 
+    [dataSource]
   );
 
   useEffect(() => {
     const isOtpPage = location.pathname.includes('otp');
-    const shouldRedirect = 
-      !otpDataLoading && 
-      currentPath === 'yourAdvertisement' && 
-      !isVerified && 
+    const shouldRedirect =
+      !otpDataLoading &&
+      currentPath === 'yourAdvertisement' &&
+      !isVerified &&
       !isOtpPage;
 
     if (shouldRedirect) {
@@ -136,11 +142,9 @@ export default function TourListView() {
     }
   }, [isVerified, otpDataLoading, currentPath, navigate, location.pathname]);
 
-  // If loading or should redirect, return null
   if (otpDataLoading || (currentPath === 'yourAdvertisement' && !isVerified)) {
-    return null; // or return a loading spinner
+    return null;
   }
-
 
   const renderFilters = (
     <Stack
@@ -161,17 +165,13 @@ export default function TourListView() {
           open={openFilters.value}
           onOpen={openFilters.onTrue}
           onClose={openFilters.onFalse}
-          //
           filters={filters}
           onFilters={handleFilters}
-          //
           canReset={canReset}
           onResetFilters={handleResetFilters}
-          //
           serviceOptions={TOUR_SERVICE_OPTIONS.map((option) => option.label)}
           tourGuideOptions={_tourGuides}
           destinationOptions={countries.map((option) => option.label)}
-          //
           dateError={dateError}
         />
 
@@ -184,10 +184,8 @@ export default function TourListView() {
     <TourFiltersResult
       filters={filters}
       onResetFilters={handleResetFilters}
-      //
       canReset={canReset}
       onFilters={handleFilters}
-      //
       results={dataFiltered.length}
     />
   );
@@ -204,16 +202,6 @@ export default function TourListView() {
           },
           { name: 'List' },
         ]}
-        // action={
-        //   <Button
-        //     component={RouterLink}
-        //     href={paths.authDemo.modern.otp}
-        //     variant="contained"
-        //     startIcon={<Iconify icon="mingcute:add-line" />}
-        //   >
-        //     New Tour
-        //   </Button>
-        // }
         sx={{
           mb: { xs: 3, md: 5 },
         }}
@@ -226,13 +214,14 @@ export default function TourListView() {
         }}
       >
         {renderFilters}
-
-        {/* {canReset && renderResults} */}
+        {canReset && renderResults}
       </Stack>
 
-      {notFound && <EmptyContent title="No Data" filled sx={{ py: 10 }} />}
-
-      <TourList tours={dataFiltered} /> {/* Pass the correct prop */}
+      {notFound ? (
+        <EmptyContent title="No Data" filled sx={{ py: 10 }} />
+      ) : (
+        <TourList tours={dataFiltered} />
+      )}
     </Container>
   );
 }
@@ -245,54 +234,58 @@ const applyFilter = ({
   sortBy,
   dateError,
 }: {
-  inputData: AdPost[];
+  inputData: any[];
   filters: ITourFilters;
   sortBy: string;
   dateError: boolean;
 }) => {
-  const { services, destination, startDate, endDate, tourGuides } = filters;
+  // Return empty array if no input data
+  if (!inputData || inputData.length === 0) return [];
 
+  const { services, destination, startDate, endDate, tourGuides } = filters;
   const tourGuideIds = tourGuides.map((tourGuide) => tourGuide.id);
+
+  let filteredData = [...inputData];
 
   // SORT BY
   if (sortBy === 'latest') {
-    inputData = orderBy(inputData, ['createdAt'], ['desc']);
+    filteredData = orderBy(filteredData, ['createdAt'], ['desc']);
   }
 
   if (sortBy === 'oldest') {
-    inputData = orderBy(inputData, ['createdAt'], ['asc']);
+    filteredData = orderBy(filteredData, ['createdAt'], ['asc']);
   }
 
   if (sortBy === 'popular') {
-    inputData = orderBy(inputData, ['totalViews'], ['desc']);
+    filteredData = orderBy(filteredData, ['totalViews'], ['desc']);
   }
 
   // FILTERS
   if (destination.length) {
-    inputData = inputData.filter((tour) => destination.includes(tour.destination));
+    filteredData = filteredData.filter((tour) => 
+      tour.destination && destination.includes(tour.destination)
+    );
   }
 
   if (tourGuideIds.length) {
-    inputData = inputData.filter((tour) =>
-      tour.tourGuides.some((filterItem: { id: string }) => tourGuideIds.includes(filterItem.id))
+    filteredData = filteredData.filter((tour) =>
+      tour.tourGuides?.some((filterItem: { id: string }) => 
+        tourGuideIds.includes(filterItem.id)
+      )
     );
   }
-  
 
   if (services.length) {
-   inputData = inputData.filter((tour) =>
-  tour.services.some((item: string) => services.includes(item))
-);
-
+    filteredData = filteredData.filter((tour) =>
+      tour.services?.some((item: string) => services.includes(item))
+    );
   }
 
-  if (!dateError) {
-    if (startDate && endDate) {
-      inputData = inputData.filter((tour) =>
-        isBetween(startDate, tour.available.startDate, tour.available.endDate)
-      );
-    }
+  if (!dateError && startDate && endDate) {
+    filteredData = filteredData.filter((tour) =>
+      tour.available && isBetween(startDate, tour.available.startDate, tour.available.endDate)
+    );
   }
 
-  return inputData;
+  return filteredData;
 };

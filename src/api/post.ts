@@ -101,26 +101,30 @@ export function useGetLatestPosts(title: string) {
     }
   }
   
-  export function useGetUserPosts(userId: string) {
-    
-    const URL = userId ? `${HOST_API}/api/getPosts/${userId}` : null;
+  export function useGetUserPosts(userId: string | undefined) {
+    const URL = userId ? `${HOST_API}/api/getAllPosts?userId=${userId}` : null;  // ✅ Include userId in API request
   
     const { data, isLoading, error, isValidating } = useSWR(URL, fetcher);
+    
+    console.log("Fetched Data:", data); // 🔍 Check actual API response structure
 
-  
-    const memoizedValue = useMemo(
-      () => ({
-        userPosts: (data || []) as IPostItem[],
+   
+    const userPosts = useMemo(() => {
+        if (!data) return [];
+        if (Array.isArray(data)) return data; // ✅ If API returns an array, use it directly
+        if (data?.data && Array.isArray(data.data)) return data.data; // ✅ If wrapped in { data: [...] }, extract
+        return [];
+    }, [data]);
+
+    return {
+        userPosts,
         userPostsLoading: isLoading,
         userPostsError: error,
         userPostsValidating: isValidating,
-        userPostsEmpty: !isLoading && (data?.length || 0) === 0,
-      }),
-      [data, error, isLoading, isValidating]
-    );
-  
-    return memoizedValue;
-  }
+        userPostsEmpty: !isLoading && userPosts.length === 0,
+    };
+}
+
 
   export async function editPost(postId: string, postData: Record<string, any>) {
     const URL = `${HOST_API}/api/editPost/${postId}`;
