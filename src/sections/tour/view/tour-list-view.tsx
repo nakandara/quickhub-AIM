@@ -54,7 +54,7 @@ export default function TourListView() {
 
   const [sortBy, setSortBy] = useState('latest');
 
-  const { userPosts } = useGetUserPosts(user?.userId);
+  const { userPosts } = useGetUserPosts();
   const { otpData, otpDataLoading } = useGetOtp(user?.userId);
   const isVerified = otpData?.some((otp: { veryOTP: any }) => otp.veryOTP);
 
@@ -70,6 +70,7 @@ export default function TourListView() {
   // Properly extract data array from API responses
   const verifiedPostsData = verifiedPosts?.data || [];
 
+  
   
   const userPostsData = userPosts|| [];
 

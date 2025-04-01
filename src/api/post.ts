@@ -101,18 +101,17 @@ export function useGetLatestPosts(title: string) {
     }
   }
   
-  export function useGetUserPosts(userId: string | undefined) {
-    const URL = userId ? `${HOST_API}/api/getAllPosts?userId=${userId}` : null;  // ✅ Include userId in API request
-  
+  export function useGetUserPosts() {  // Removed userId parameter
+    const URL = `${HOST_API}/api/getAllPosts`;  // Removed userId from URL
+    
     const { data, isLoading, error, isValidating } = useSWR(URL, fetcher);
     
-    console.log("Fetched Data:", data); // 🔍 Check actual API response structure
-
    
+
     const userPosts = useMemo(() => {
         if (!data) return [];
-        if (Array.isArray(data)) return data; // ✅ If API returns an array, use it directly
-        if (data?.data && Array.isArray(data.data)) return data.data; // ✅ If wrapped in { data: [...] }, extract
+        if (Array.isArray(data)) return data;
+        if (data?.data && Array.isArray(data.data)) return data.data;
         return [];
     }, [data]);
 
