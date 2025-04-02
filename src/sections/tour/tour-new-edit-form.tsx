@@ -35,15 +35,11 @@ import FormProvider, {
 } from 'src/components/hook-form';
 
 import { useMockedUser } from 'src/hooks/use-mocked-user';
-import { createPost } from 'src/api/post';
+import { createPost, editPost } from 'src/api/post';
 import { Box } from '@mui/system';
 import { Button, CircularProgress, IconButton } from '@mui/material';
 import Iconify from 'src/components/iconify/iconify';
 import { storage } from '../auth/firebase/firebase-image';
-
-// ----------------------------------------------------------------------
-
-
 
 export default function TourNewEditForm({ currentTour }: any) {
   const router = useRouter();
@@ -51,31 +47,32 @@ export default function TourNewEditForm({ currentTour }: any) {
   const pathParts = window.location.pathname.split('/');
   const city = pathParts.slice(-2).join('/');
 
-
-console.log(city,'ooooooo');
-
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
   const [uploading, setUploading] = useState(false);
   const { id } = useParams(); 
   const mdUp = useResponsive('up', 'md');
 
   const { enqueueSnackbar } = useSnackbar();
-  
 
-  console.log(currentTour,'888888888888888');
-  
-  const selectedTour = Array.isArray(currentTour) ? currentTour.find((tour) => tour._id === "67df10845e53a040df48dff9") : null;
+  const selectedTour = Array.isArray(currentTour) ? currentTour.find((tour) => tour._id === id) : null;
+
+  useEffect(() => {
+    if (!user?._id) {
+      enqueueSnackbar('Please login to your account to proceed.', { variant: 'warning' });
+      router.push(paths.auth.amplify.login); // Redirect to login page
+    }
+  }, [user, enqueueSnackbar, router]);
 
   const NewTourSchema = Yup.object().shape({
     userId: Yup.string().required('User ID is required'),
     title: Yup.string().required('Title is required'),
     bodyType: Yup.string().required('Body Type is required'),
     mobileNumber: Yup.string()
-    .required('Mobile number is required')
-    .matches(/^[0-9]{10}$/, 'Mobile number must be exactly 10 digits'),
+      .required('Mobile number is required')
+      .matches(/^[0-9]{10}$/, 'Mobile number must be exactly 10 digits'),
     whatsappNumber: Yup.string()
-    .required('whatsappNumber number is required')
-    .matches(/^[0-9]{10}$/, 'Mobile number must be exactly 10 digits'),
+      .required('whatsappNumber number is required')
+      .matches(/^[0-9]{10}$/, 'Mobile number must be exactly 10 digits'),
     brand: Yup.string().required('brand Type is required'),
     price: Yup.string().required('Price is required'),
     description: Yup.string().required('Description is required'),
@@ -92,22 +89,21 @@ console.log(city,'ooooooo');
     engineCapacity: Yup.string().required('Engine Capacity is required'),
     mileage: Yup.string()
       .required('Mileage is required')
-      .matches(/^\d+$/, 'Mileage must be a number'), // Ensure it is numeric
+      .matches(/^\d+$/, 'Mileage must be a number'),
     tags: Yup.array().of(Yup.string()).min(2, 'Must have at least 2 tags'),
-    services: Yup.array().of(Yup.string()).min(1, 'Must have at least 2 services'),
-    destination: Yup.string().required('Destination is required'),
-  
-    
+    condition: Yup.string()
+      .required('Condition is required')
+      .oneOf(['Used', 'New', 'Recondition'], 'Invalid condition'),
   });
 
   const defaultValues = useMemo(
     () => ({
-      userId: user?._id || '',
+      userId: user?.userId || '',
       title: selectedTour?.title || '',
       price: selectedTour?.price || '',
       bodyType: selectedTour?.bodyType || '',
       city: selectedTour?.city || '',
-      brand:selectedTour?.brand || '',
+      brand: selectedTour?.brand || '',
       description: selectedTour?.description || '',
       images: selectedTour?.images || [],
       fuelType: selectedTour?.fuelType || [],
@@ -115,11 +111,10 @@ console.log(city,'ooooooo');
       tags: selectedTour?.tags || [],
       yearOfManufacture: selectedTour?.yearOfManufacture || '',
       engineCapacity: selectedTour?.engineCapacity || '',
-      mileage: selectedTour?.mileage || '', // New field
-      destination: selectedTour?.destination || '',
-      services: selectedTour?.services || [],
+      mileage: selectedTour?.mileage || '',
       mobileNumber: selectedTour?.mobileNumber || '', 
-      whatsappNumber:selectedTour?.mobileNumber || '', 
+      whatsappNumber: selectedTour?.mobileNumber || '',
+      condition: selectedTour?.condition || 'Used',
     }),
     [selectedTour, user]
   );
@@ -150,21 +145,28 @@ console.log(city,'ooooooo');
     try {
       await new Promise((resolve) => setTimeout(resolve, 500));
       
-      // Add city to form data before submission
       data.city = city;
-  
-      reset();
-      enqueueSnackbar(currentTour ? 'Update success!' : 'Create success!');
-      createPost(data);
-      router.push(paths.dashboard.tour.root);
+      
+      if (selectedTour && selectedTour.postId) {
+        const response = await editPost(selectedTour.postId, data);
+        if (response.success) {
+          enqueueSnackbar('Update success!');
+          router.push(paths.dashboard.tour.root);
+        } else {
+          throw new Error(response.error || 'Failed to update post');
+        }
+      } else {
+        await createPost(data);
+        enqueueSnackbar('Create success!');
+        router.push(paths.dashboard.tour.root);
+      }
+      
       console.info('Submitted Data:', data);
     } catch (error) {
       console.error('Submission Error:', error);
+      enqueueSnackbar(error.message || 'An error occurred', { variant: 'error' });
     }
   });
-  
-
-
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -172,7 +174,6 @@ console.log(city,'ooooooo');
 
     if (currentImages.length + files.length > 4) {
       console.log('Limit Exceeded', 'You can upload a maximum of 4 images.', 'warning');
-
       return;
     }
 
@@ -207,7 +208,7 @@ console.log(city,'ooooooo');
       )
     );
 
-    setValue('images', [...currentImages, ...uploadedImageUrls]); // Update form images
+    setValue('images', [...currentImages, ...uploadedImageUrls]);
     setUploading(false);
   };
 
@@ -320,6 +321,24 @@ console.log(city,'ooooooo');
           {!mdUp && <CardHeader title="Properties" />}
 
           <Stack spacing={3} sx={{ p: 3 }}>
+            {/* Add Condition Field Here */}
+            <Stack>
+              <Typography variant="subtitle2" sx={{ mb: 1.5 }}>
+                Condition
+              </Typography>
+              <RHFAutocomplete
+                name="condition"
+                options={['Used', 'New', 'Recondition']}
+                getOptionLabel={(option) => option}
+                isOptionEqualToValue={(option, value) => option === value}
+                renderOption={(props, option) => (
+                  <li {...props} key={option}>
+                    {option}
+                  </li>
+                )}
+              />
+            </Stack>
+
             <Stack>
               <Typography variant="subtitle2" sx={{ mb: 1.5 }}>
                 Tour Guide
@@ -331,13 +350,13 @@ console.log(city,'ooooooo');
 
                 <RHFAutocomplete
                   name="fuelType"
-                  multiple={false} // Allow single selection
+                  multiple={false}
                   placeholder="Select Fuel Type"
                   options={['Petrol', 'Diesel']}
                   getOptionLabel={(option) => option}
                   isOptionEqualToValue={(option, value) => option === value}
                   onChange={(event, value) => {
-                    setValue('fuelType', value ? [value] : [], { shouldValidate: true }); // Convert to array
+                    setValue('fuelType', value ? [value] : [], { shouldValidate: true });
                   }}
                   renderTags={(selected, getTagProps) =>
                     selected.map((fuelType, index) => (
@@ -353,18 +372,7 @@ console.log(city,'ooooooo');
                 />
               </Stack>
             </Stack>
-            <Stack spacing={1}>
-              <Typography variant="subtitle2">Condition
-              </Typography>
-              <RHFMultiCheckbox
-                name="services"
-                options={CONDITION}
-                sx={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(2, 1fr)',
-                }}
-              />
-            </Stack>
+     
             <Stack>
               <Stack>
                 <Typography variant="subtitle2" sx={{ mb: 1.5 }}>
@@ -373,13 +381,13 @@ console.log(city,'ooooooo');
 
                 <RHFAutocomplete
                   name="transmission"
-                  multiple={false} // Allow single selection
+                  multiple={false}
                   placeholder="Select transmission Type"
                   options={['Manual', 'Automatic', 'Semi-Automatic']}
                   getOptionLabel={(option) => option}
                   isOptionEqualToValue={(option, value) => option === value}
                   onChange={(event, value) => {
-                    setValue('transmission', value ? [value] : [], { shouldValidate: true }); // Convert to array
+                    setValue('transmission', value ? [value] : [], { shouldValidate: true });
                   }}
                   renderTags={(selected, getTagProps) =>
                     selected.map((transmission, index) => (
@@ -398,7 +406,6 @@ console.log(city,'ooooooo');
 
             <Stack spacing={1.5}>
               <Typography variant="subtitle2">Available</Typography>
-          
             </Stack>
 
             <Stack spacing={1.5}>
@@ -421,20 +428,6 @@ console.log(city,'ooooooo');
               <Typography variant="subtitle2">whatsapp Number</Typography>
               <RHFTextField name="whatsappNumber" placeholder="+947145..." />
             </Stack>
-
-            <Stack spacing={1.5}>
-              <Typography variant="subtitle2">Destination</Typography>
-              <RHFAutocomplete
-                name="destination"
-                type="country"
-                placeholder="+ Destination"
-                options={countries.map((option) => option.label)}
-                getOptionLabel={(option) => option}
-              />
-            </Stack>
-
-     
-            
 
             <Stack spacing={1.5}>
               <Typography variant="subtitle2">Tags</Typography>
@@ -497,9 +490,7 @@ console.log(city,'ooooooo');
     <FormProvider methods={methods} onSubmit={onSubmit}>
       <Grid container spacing={3}>
         {renderDetails}
-
         {renderProperties}
-
         {renderActions}
       </Grid>
     </FormProvider>

@@ -54,7 +54,7 @@ export default function TourListView() {
 
   const [sortBy, setSortBy] = useState('latest');
 
-  const { userPosts } = useGetUserPosts();
+  const { userPosts } = useGetUserPosts(user?.userId);
   const { otpData, otpDataLoading } = useGetOtp(user?.userId);
   const isVerified = otpData?.some((otp: { veryOTP: any }) => otp.veryOTP);
 
@@ -71,13 +71,10 @@ export default function TourListView() {
   const verifiedPostsData = verifiedPosts?.data || [];
 
   
-  
-  const userPostsData = userPosts|| [];
+  console.log(userPosts, 'User posts in component');
 
-  
-
-  // Decide which data to use based on the currentPath
-  const dataSource = currentPath === 'yourAdvertisement' ? verifiedPosts : userPostsData;
+  // Directly use userPosts instead of userPostsData
+  const dataSource = currentPath === 'yourAdvertisement' ? userPosts : verifiedPosts;
 
   const dataFiltered = applyFilter({
     inputData: dataSource,

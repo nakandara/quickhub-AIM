@@ -101,29 +101,32 @@ export function useGetLatestPosts(title: string) {
     }
   }
   
-  export function useGetUserPosts() {  // Removed userId parameter
-    const URL = `${HOST_API}/api/getAllPosts`;  // Removed userId from URL
+  export function useGetUserPosts(userId: string) {
+    const URL = `${HOST_API}/api/getPosts/${userId}`;
     
     const { data, isLoading, error, isValidating } = useSWR(URL, fetcher);
-    
-   
-
+    console.log(data, 'Raw data from API');
+  
+    // Simplify the data transformation
     const userPosts = useMemo(() => {
-        if (!data) return [];
-        if (Array.isArray(data)) return data;
-        if (data?.data && Array.isArray(data.data)) return data.data;
-        return [];
+      if (!data) return [];
+      // If data is already an array, return it
+      if (Array.isArray(data)) return data;
+      // If data is a single object, wrap it in an array
+      if (typeof data === 'object' && data !== null) return [data];
+      return [];
     }, [data]);
-
+  
+    console.log(userPosts, 'Transformed user posts');
+  
     return {
-        userPosts,
-        userPostsLoading: isLoading,
-        userPostsError: error,
-        userPostsValidating: isValidating,
-        userPostsEmpty: !isLoading && userPosts.length === 0,
+      userPosts,
+      userPostsLoading: isLoading,
+      userPostsError: error,
+      userPostsValidating: isValidating,
+      userPostsEmpty: !isLoading && userPosts.length === 0,
     };
-}
-
+  }
 
   export async function editPost(postId: string, postData: Record<string, any>) {
     const URL = `${HOST_API}/api/editPost/${postId}`;
