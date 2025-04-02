@@ -18,17 +18,26 @@ export default function CreateAdd() {
 
   // Fetch OTP data
   const { otpData, otpDataLoading } = useGetOtp(userId);
+  
 
   // Check if the user is verified
   const isVerified = otpData?.some((otp: { veryOTP: any; }) => otp.veryOTP);
 
   const handleNavigate = () => {
+  
+    
+    if (!userId) {
+      navigate(paths.auth.amplify.login); // Redirect to login if userId is missing
+      return;
+    }
+  
     if (isVerified) {
       navigate(paths.dashboard.posts.category);
     } else {
       navigate(paths.authDemo.modern.otp);
     }
   };
+  
 
   // Hide button if current route is '/dashboard/posts/category'
   if (location.pathname === paths.dashboard.posts.category) {
