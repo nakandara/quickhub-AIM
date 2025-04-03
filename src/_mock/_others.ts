@@ -151,10 +151,11 @@ export const _socials = [
 
 export const _homePlans = [...Array(3)].map((_, index) => ({
   license: ['Standard', 'Standard Plus', 'Extended'][index],
-  commons: ['One end products', '12 months updates', '6 months of support'],
+  prise:['500','700','900'],
+  commons: ['Your advertisement receives premium placement for maximum visibility', 'Increased Visibility: Highlighted listings grab more buyer or renter attention.', 'Priority Support: Get fast, dedicated assistance'],
   options: [
-    'JavaScript version',
-    'TypeScript version',
+    '6 month support',
+    'No images Limit',
     'Design Resources',
     'Commercial applications',
   ],

@@ -57,11 +57,7 @@ export default function HomePricing() {
         </Typography>
       </m.div>
   
-      <m.div variants={varFade().inUp}>
-        <Button variant="contained" size="large" sx={{ mt: 3 }}>
-          Get Started
-        </Button>
-      </m.div>
+
   
       <m.div variants={varFade().inUp}>
         <Stack direction="row" spacing={2} justifyContent="center" sx={{ mt: 3 }}>
@@ -180,11 +176,12 @@ interface PlanCardProps extends StackProps {
     commons: string[];
     options: string[];
     icons: string[];
+    prise: string[];
   };
 }
 
 function PlanCard({ plan, sx, ...other }: PlanCardProps) {
-  const { license, commons, options, icons } = plan;
+  const { license, commons, options, icons,prise } = plan;
   const locationP = useLocation();
   const navigate = useNavigate();
   const lastSegment = locationP.pathname.split('/').pop();
@@ -454,6 +451,26 @@ function PlanCard({ plan, sx, ...other }: PlanCardProps) {
           );
         })}
       </Stack>
+      <Box sx={{ position: 'relative' }}>
+
+  <Typography variant="h6" sx={{ color: 'text.secondary', mt: 0.5 }}>
+  Today Free
+  </Typography>
+  <Box
+    sx={{
+      left: 0,
+      bottom: 4,
+      width: 40,
+      height: 8,
+      opacity: 0.48,
+      bgcolor: 'error.main',
+      position: 'absolute',
+      ...(standardLicense && { bgcolor: 'primary.main' }),
+      ...(plus && { bgcolor: 'warning.main' }),
+    }}
+  />
+</Box>
+
 
       <Stack alignItems="flex-end">
         <Button

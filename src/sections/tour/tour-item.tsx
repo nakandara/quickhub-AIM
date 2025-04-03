@@ -14,7 +14,7 @@ import Button from '@mui/material/Button';
 
 import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
-
+import { useTheme } from '@mui/material/styles';
 import { fDateTime } from 'src/utils/format-time';
 import { fCurrency } from 'src/utils/format-number';
 import { useLocation } from 'react-router';
@@ -49,11 +49,21 @@ export default function TourItem({ tour, onView, onEdit, onDelete }: Props) {
     title,
     userId,
     postId,
+    verify
   } = tour;
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
+
+const theme = useTheme();
+
+  let bgColor;
+  if (verify) {
+    bgColor = theme.palette.mode === 'dark' ? 'success.dark' : 'success.lighter';
+  } else {
+    bgColor = theme.palette.mode === 'dark' ? 'warning.dark' : 'warning.lighter';
+  }
 
   const handleMenuClose = () => {
     setAnchorEl(null);
@@ -80,21 +90,25 @@ export default function TourItem({ tour, onView, onEdit, onDelete }: Props) {
 
   const renderRating = (
     <Stack
-      direction="row"
-      alignItems="center"
-      sx={{
-        top: 8,
-        right: 8,
-        zIndex: 9,
-        borderRadius: 1,
-        position: 'absolute',
-        p: '2px 6px 2px 4px',
-        typography: 'subtitle2',
-        bgcolor: 'warning.lighter',
-      }}
-    >
-      <Iconify icon="eva:star-fill" sx={{ color: 'warning.main', mr: 0.25 }} /> {mileage}
-    </Stack>
+    direction="row"
+    alignItems="center"
+    sx={{
+      top: 8,
+      right: 8,
+      zIndex: 9,
+      borderRadius: 1,
+      position: 'absolute',
+      p: '2px 6px 2px 4px',
+      typography: 'subtitle2',
+      bgcolor: bgColor, // Use the precomputed color variable
+    }}
+  >
+    <Iconify
+      icon={verify ? 'eva:checkmark-circle-2-fill' : 'eva:clock-outline'}
+      sx={{ color: verify ? 'success.main' : 'warning.main', mr: 0.25 }}
+    />
+    {verify ? 'Verified' : 'Pending'}
+  </Stack>
   );
 
   const renderImages = (
@@ -102,7 +116,7 @@ export default function TourItem({ tour, onView, onEdit, onDelete }: Props) {
       spacing={0.5}
       direction="row"
       sx={{
-        p: (theme) => theme.spacing(1, 1, 0, 1),
+        p: (spacingTheme) => spacingTheme.spacing(1, 1, 0, 1),
       }}
     >
       <Stack flexGrow={1} sx={{ position: 'relative' }}>
@@ -131,7 +145,7 @@ export default function TourItem({ tour, onView, onEdit, onDelete }: Props) {
   const renderTexts = (
     <ListItemText
       sx={{
-        p: (theme) => theme.spacing(2.5, 2.5, 2, 2.5),
+        p: (spacingTheme) => spacingTheme.spacing(2.5, 2.5, 2, 2.5),
       }}
       primary={`Posted date: ${fDateTime(createdAt)}`}
       secondary={
@@ -158,7 +172,7 @@ export default function TourItem({ tour, onView, onEdit, onDelete }: Props) {
       spacing={1.5}
       sx={{
         position: 'relative',
-        p: (theme) => theme.spacing(0, 2.5, 2.5, 2.5),
+        p: (spacingTheme) => spacingTheme.spacing(0, 2.5, 2.5, 2.5),
       }}
     >
       {/* Conditionally render the IconButton and Menu */}
