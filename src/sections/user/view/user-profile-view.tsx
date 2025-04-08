@@ -53,6 +53,8 @@ const TABS = [
 export default function UserProfileView() {
   const settings = useSettingsContext();
 
+  
+
   const { user } = useMockedUser();
   const { myUser } = useMyAccountUser(user?.userId);
   const { myProfilePhoto, } = useMyAccountProfilePhoto(user?.userId);
@@ -96,13 +98,7 @@ const [fetchProgress, setFetchProgress] = useState<number>(0);
     getPhoto();
   }, [user?.userId]);
 
-  console.log(myUser?.username,'rrrrrr');
-  console.log(myProfilePhoto,'4444444444');
-  
 
-  console.log(_userAbout,'-------------');
-
-  console.log(_userFeeds,'------------ssssssssssssss-');
   
 
   return (
@@ -127,7 +123,7 @@ const [fetchProgress, setFetchProgress] = useState<number>(0);
       >
         <ProfileCover
           role={myUser?.username || 'Unknown'}
-          name={user?.displayName}
+          name={user?.name}
           avatarUrl={photoUrl || 'Unknown'}
           coverUrl={_userAbout.coverUrl}
         />

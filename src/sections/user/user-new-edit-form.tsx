@@ -26,10 +26,10 @@ import FormProvider, {
   RHFUploadAvatar,
   RHFAutocomplete,
 } from 'src/components/hook-form';
-import { ref,getDownloadURL, uploadBytesResumable } from 'firebase/storage';
-
+import { ref, getDownloadURL, uploadBytesResumable } from 'firebase/storage';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { IUserItem1 } from 'src/types/user';
-import { createProfile,updateProfile, fetchProfilePhoto, updateProfilePhoto } from 'src/api/my-account';
+import { createProfile, updateProfile, fetchProfilePhoto, updateProfilePhoto } from 'src/api/my-account';
 import { LinearProgress } from '@mui/material';
 
 import { useMockedUser } from 'src/hooks/use-mocked-user';
@@ -41,6 +41,21 @@ import { storage } from '../auth/firebase/firebase-image';
 type Props = {
   currentUser?: IUserItem1;
 };
+export type FormValues = {
+  userId: string;
+  username: string;
+  email: string;
+  phoneNumber: string;
+  address: string;
+  country: string;
+  state: string;
+  city: string;
+  zipCode: string;
+  avatarUrl?: string;
+  status?: string;
+  isVerified?: boolean;
+};
+
 
 export default function UserNewEditForm({ currentUser }: Props) {
   const router = useRouter();
@@ -50,16 +65,16 @@ export default function UserNewEditForm({ currentUser }: Props) {
 
   const [loading, setLoading] = useState<boolean>(true);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
-const [fetchProgress, setFetchProgress] = useState<number>(0);
-
+  const [fetchProgress, setFetchProgress] = useState<number>(0);
+  const [uploading, setUploading] = useState(false);
 
   const NewUserSchema = Yup.object().shape({
+    userId: Yup.string().required('User ID is required'),
     username: Yup.string().required('Name is required'),
     email: Yup.string().required('Email is required').email('Email must be a valid email address'),
     phoneNumber: Yup.string().required('Phone number is required'),
     address: Yup.string().required('Address is required'),
     country: Yup.string().required('Country is required'),
-    birthday: Yup.string().required('birthday is required'),
     state: Yup.string().required('State is required'),
     city: Yup.string().required('City is required'),
     zipCode: Yup.string().required('Zip code is required'),
@@ -72,15 +87,15 @@ const [fetchProgress, setFetchProgress] = useState<number>(0);
     const getPhoto = async () => {
       setLoading(true);
       setFetchProgress(0);
-  
+
       try {
         const interval = setInterval(() => {
           setFetchProgress((prev) => Math.min(prev + 20, 100));
         }, 200);
-  
+
         const photo = await fetchProfilePhoto(user?.userId);
         setPhotoUrl(photo || '');
-  
+
         clearInterval(interval);
         setFetchProgress(100);
       } catch (error) {
@@ -89,35 +104,33 @@ const [fetchProgress, setFetchProgress] = useState<number>(0);
         setLoading(false);
       }
     };
-  
+
     getPhoto();
   }, [user?.userId]);
   
 
-
   const defaultValues = useMemo(() => ({
+    userId: user?.userId || '',
     username: currentUser?.username || '',
     city: currentUser?.city || '',
-    birthday: currentUser?.birthday || '',
     email: currentUser?.email || '',
     state: currentUser?.state || '',
     status: currentUser?.status || '',
     address: currentUser?.address || '',
     country: currentUser?.country || '',
     zipCode: currentUser?.zipCode || '',
-    gender: currentUser?.gender || '',
-    avatarUrl: photoUrl || currentUser?.avatarUrl || '', 
+    avatarUrl: photoUrl || currentUser?.avatarUrl || '',
     phoneNumber: currentUser?.phoneNumber || '',
-    isVerified: currentUser?.isVerified || true,
-  }), [currentUser, photoUrl]);
-  
- 
+    isVerified: currentUser?.isVerified ?? true,
+  }), [currentUser, photoUrl, user?.userId]);
 
-  const methods = useForm({
+  const methods = useForm<FormValues>({
     resolver: yupResolver(NewUserSchema),
     defaultValues,
     reValidateMode: 'onChange',
   });
+  
+  
 
   const {
     reset,
@@ -125,51 +138,47 @@ const [fetchProgress, setFetchProgress] = useState<number>(0);
     control,
     setValue,
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting, errors },
   } = methods;
 
   const values = watch();
 
-  const [uploading, setUploading] = useState(false);
-  
   useEffect(() => {
     reset(defaultValues);
   }, [defaultValues, reset]);
+
   const onSubmit = handleSubmit(async (data) => {
     const formattedData = {
       ...data,
-      userId: currentUser?.id || '',
+      userId: currentUser?.id || data.userId,
     };
-  
+
     const result = currentUser
       ? await updateProfile(user?.userId, formattedData)
       : await createProfile(formattedData);
-  
+
     if (result) {
       enqueueSnackbar("Operation successful!");
     } else {
       enqueueSnackbar("Operation failed!", { variant: "error" });
     }
   });
-  
-  
 
   const handleDrop = async (acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
     if (!file) return;
-  
+
     setUploading(true);
-  
+
     try {
       const storageRef = ref(storage, `profilePhotos/${file.name}`);
       const uploadTask = uploadBytesResumable(storageRef, file);
-  
+
       uploadTask.on(
         'state_changed',
         (snapshot) => {
           const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          setUploadProgress(progress); // Update progress
-          console.log(`Upload is ${progress}% done`);
+          setUploadProgress(progress);
         },
         (error) => {
           console.error('Upload error:', error);
@@ -178,7 +187,6 @@ const [fetchProgress, setFetchProgress] = useState<number>(0);
         },
         async () => {
           const imageUrl = await getDownloadURL(uploadTask.snapshot.ref);
-          console.log('File available at', imageUrl);
           const isUpdated = await updateProfilePhoto(user?.userId || '', imageUrl);
           if (isUpdated) {
             setValue('avatarUrl', imageUrl, { shouldValidate: true });
@@ -187,19 +195,15 @@ const [fetchProgress, setFetchProgress] = useState<number>(0);
             enqueueSnackbar('Failed to update profile photo', { variant: 'error' });
           }
           setUploading(false);
-          setUploadProgress(100); // Complete progress
+          setUploadProgress(100);
         }
       );
-      
     } catch (error) {
       console.error('Error uploading file:', error);
       enqueueSnackbar('Failed to upload image', { variant: 'error' });
       setUploading(false);
     }
   };
-  
- 
-  
 
   return (
     <FormProvider methods={methods} onSubmit={onSubmit}>
@@ -220,40 +224,29 @@ const [fetchProgress, setFetchProgress] = useState<number>(0);
             )}
 
             <Box sx={{ mb: 5 }}>
-            
-            <Box sx={{ mb: 5 }}>
-  <RHFUploadAvatar
-    name="avatarUrl"
-    maxSize={3145728}
-    onDrop={handleDrop}
-    disabled={uploading}
-    helperText={
-      <Typography
-        variant="caption"
-        sx={{
-          mt: 3,
-          mx: 'auto',
-          display: 'block',
-          textAlign: 'center',
-          color: 'text.disabled',
-        }}
-      >
-        Allowed *.jpeg, *.jpg, *.png, *.gif
-        <br /> max size of {fData(3145728)}
-      </Typography>
-    }
-  />
-  <Box sx={{ width: '100%', mt: 2 }}>
-    {(uploading || loading) && (
-      <LinearProgress
-        variant="determinate"
-        value={uploading ? uploadProgress : fetchProgress}
-      />
-    )}
-  </Box>
-</Box>
-
-
+              <RHFUploadAvatar
+                name="avatarUrl"
+                maxSize={3145728}
+                onDrop={handleDrop}
+                disabled={uploading}
+                helperText={
+                  <Typography
+                    variant="caption"
+                    sx={{ mt: 3, mx: 'auto', display: 'block', textAlign: 'center', color: 'text.disabled' }}
+                  >
+                    Allowed *.jpeg, *.jpg, *.png, *.gif
+                    <br /> max size of {fData(3145728)}
+                  </Typography>
+                }
+              />
+              <Box sx={{ width: '100%', mt: 2 }}>
+                {(uploading || loading) && (
+                  <LinearProgress
+                    variant="determinate"
+                    value={uploading ? uploadProgress : fetchProgress}
+                  />
+                )}
+              </Box>
             </Box>
 
             {currentUser && (
@@ -328,9 +321,6 @@ const [fetchProgress, setFetchProgress] = useState<number>(0);
               <RHFTextField name="username" label="Full Name" />
               <RHFTextField name="email" label="Email Address" />
               <RHFTextField name="phoneNumber" label="Phone Number" />
-
-
-
               <RHFAutocomplete
                 name="country"
                 type="country"
@@ -340,12 +330,12 @@ const [fetchProgress, setFetchProgress] = useState<number>(0);
                 options={countries.map((option) => option.label)}
                 getOptionLabel={(option) => option}
               />
-
               <RHFTextField name="state" label="State/Region" />
               <RHFTextField name="city" label="City" />
               <RHFTextField name="address" label="Address" />
               <RHFTextField name="zipCode" label="Zip/Code" />
-             
+              {/* Hidden userId input */}
+              <RHFTextField name="userId" label="User ID" sx={{ display: 'none' }} />
             </Box>
 
             <Stack alignItems="flex-end" sx={{ mt: 3 }}>
