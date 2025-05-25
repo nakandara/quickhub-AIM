@@ -1,387 +1,195 @@
-import { useState, useCallback } from 'react';
-
-import Tab from '@mui/material/Tab';
-import Tabs from '@mui/material/Tabs';
+import { useState, useEffect } from 'react';
+import { useTheme } from '@mui/material/styles';
+import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
-import Button from '@mui/material/Button';
-import Tooltip from '@mui/material/Tooltip';
-import { alpha } from '@mui/material/styles';
-import Container from '@mui/material/Container';
+import Stack from '@mui/material/Stack';
+import Avatar from '@mui/material/Avatar';
+import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
-import IconButton from '@mui/material/IconButton';
+import TableCell from '@mui/material/TableCell';
+import CardHeader from '@mui/material/CardHeader';
+import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
+import LinearProgress from '@mui/material/LinearProgress';
+import { Chip, IconButton, Tooltip } from '@mui/material';
 
-import { paths } from 'src/routes/paths';
-import { useRouter } from 'src/routes/hooks';
-
-import { useBoolean } from 'src/hooks/use-boolean';
-
-import { isAfter, isBetween } from 'src/utils/format-time';
-
-import { _orders, ORDER_STATUS_OPTIONS } from 'src/_mock';
+import { fDateTime } from 'src/utils/format-time';
+import { fCurrency } from 'src/utils/format-number';
 
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
-import { useSnackbar } from 'src/components/snackbar';
-import { ConfirmDialog } from 'src/components/custom-dialog';
-import { useSettingsContext } from 'src/components/settings';
-import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
-import {
-  useTable,
-  emptyRows,
-  TableNoData,
-  getComparator,
-  TableEmptyRows,
-  TableHeadCustom,
-  TableSelectedAction,
-  TablePaginationCustom,
-} from 'src/components/table';
+import { TableHeadCustom } from 'src/components/table';
 
-import { IOrderItem, IOrderTableFilters, IOrderTableFilterValue } from 'src/types/order';
-import OrderTableToolbar from 'src/sections/order/order-table-toolbar';
-import OrderTableFiltersResult from 'src/sections/order/order-table-filters-result';
-import OrderTableRow from 'src/sections/order/order-table-row';
-
+import { getAllPosts, Post } from 'src/api/post';
+import PostDetailsDialog from '../post-details-dialog';
 
 // ----------------------------------------------------------------------
-
-const STATUS_OPTIONS = [{ value: 'all', label: 'All' }, ...ORDER_STATUS_OPTIONS];
 
 const TABLE_HEAD = [
-  { id: 'orderNumber', label: 'Order', width: 116 },
-  { id: 'name', label: 'Customer' },
-  { id: 'createdAt', label: 'Date', width: 140 },
-  { id: 'totalQuantity', label: 'Items', width: 120, align: 'center' },
-  { id: 'totalAmount', label: 'Price', width: 140 },
-  { id: 'status', label: 'Status', width: 110 },
-  { id: '', width: 88 },
+  { id: 'title', label: 'Title' },
+  { id: 'brand', label: 'Brand' },
+  { id: 'price', label: 'Price', align: 'right' },
+  { id: 'condition', label: 'Condition' },
+  { id: 'verify', label: 'Status' },
+  { id: 'createdAt', label: 'Posted Date' },
+  { id: 'actions', label: 'Actions', align: 'right' },
 ];
 
-const defaultFilters: IOrderTableFilters = {
-  name: '',
-  status: 'all',
-  startDate: null,
-  endDate: null,
-};
-
 // ----------------------------------------------------------------------
 
-export default function AdminAccessListView() {
-  const { enqueueSnackbar } = useSnackbar();
+export default function AdminAccessList() {
+  const theme = useTheme();
 
-  const table = useTable({ defaultOrderBy: 'orderNumber' });
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [openDialog, setOpenDialog] = useState(false);
 
-  const settings = useSettingsContext();
+  const fetchPosts = async () => {
+    try {
+      const response = await getAllPosts();
+      if (response.success) {
+        setPosts(response.data);
+      } else {
+        setError(response.message);
+      }
+    } catch (err) {
+      setError('Failed to fetch posts');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const router = useRouter();
-
-  const confirm = useBoolean();
-
-  const [tableData, setTableData] = useState<IOrderItem[]>(_orders);
-
-  const [filters, setFilters] = useState(defaultFilters);
-
-  const dateError = isAfter(filters.startDate, filters.endDate);
-
-  const dataFiltered = applyFilter({
-    inputData: tableData,
-    comparator: getComparator(table.order, table.orderBy),
-    filters,
-    dateError,
-  });
-
-  const dataInPage = dataFiltered.slice(
-    table.page * table.rowsPerPage,
-    table.page * table.rowsPerPage + table.rowsPerPage
-  );
-
-  const denseHeight = table.dense ? 56 : 56 + 20;
-
-  const canReset =
-    !!filters.name || filters.status !== 'all' || (!!filters.startDate && !!filters.endDate);
-
-  const notFound = (!dataFiltered.length && canReset) || !dataFiltered.length;
-
-  const handleFilters = useCallback(
-    (name: string, value: IOrderTableFilterValue) => {
-      table.onResetPage();
-      setFilters((prevState) => ({
-        ...prevState,
-        [name]: value,
-      }));
-    },
-    [table]
-  );
-
-  const handleResetFilters = useCallback(() => {
-    setFilters(defaultFilters);
+  useEffect(() => {
+    fetchPosts();
   }, []);
 
-  const handleDeleteRow = useCallback(
-    (id: string) => {
-      const deleteRow = tableData.filter((row) => row.id !== id);
+  const handleViewPost = (post: Post) => {
+    setSelectedPost(post);
+    setOpenDialog(true);
+  };
 
-      enqueueSnackbar('Delete success!');
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setSelectedPost(null);
+  };
 
-      setTableData(deleteRow);
+  const handleVerificationSuccess = () => {
+    // Refresh the posts list after successful verification
+    fetchPosts();
+  };
 
-      table.onUpdatePageDeleteRow(dataInPage.length);
-    },
-    [dataInPage.length, enqueueSnackbar, table, tableData]
-  );
-
-  const handleDeleteRows = useCallback(() => {
-    const deleteRows = tableData.filter((row) => !table.selected.includes(row.id));
-
-    enqueueSnackbar('Delete success!');
-
-    setTableData(deleteRows);
-
-    table.onUpdatePageDeleteRows({
-      totalRowsInPage: dataInPage.length,
-      totalRowsFiltered: dataFiltered.length,
-    });
-  }, [dataFiltered.length, dataInPage.length, enqueueSnackbar, table, tableData]);
-
-  const handleViewRow = useCallback(
-    (id: string) => {
-      router.push(paths.dashboard.order.details(id));
-    },
-    [router]
-  );
-
-  const handleFilterStatus = useCallback(
-    (event: React.SyntheticEvent, newValue: string) => {
-      handleFilters('status', newValue);
-    },
-    [handleFilters]
-  );
-
-  return (
-    <>
-      <Container maxWidth={settings.themeStretch ? false : 'lg'}>
-        <CustomBreadcrumbs
-          heading="List"
-          links={[
-            {
-              name: 'Dashboard',
-              href: paths.dashboard.root,
-            },
-            {
-              name: 'add',
-              href: paths.dashboard.order.root,
-            },
-            { name: 'List' },
-          ]}
-          sx={{
-            mb: { xs: 3, md: 5 },
-          }}
-        />
-
-        <Card>
-          <Tabs
-            value={filters.status}
-            onChange={handleFilterStatus}
-            sx={{
-              px: 2.5,
-              boxShadow: (theme) => `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}`,
-            }}
-          >
-            {STATUS_OPTIONS.map((tab) => (
-              <Tab
-                key={tab.value}
-                iconPosition="end"
-                value={tab.value}
-                label={tab.label}
-                icon={
-                  <Label
-                    variant={
-                      ((tab.value === 'all' || tab.value === filters.status) && 'filled') || 'soft'
-                    }
-                    color={
-                      (tab.value === 'completed' && 'success') ||
-                      (tab.value === 'pending' && 'warning') ||
-                      (tab.value === 'cancelled' && 'error') ||
-                      'default'
-                    }
-                  >
-                    {['completed', 'pending', 'cancelled', 'refunded'].includes(tab.value)
-                      ? tableData.filter((user) => user.status === tab.value).length
-                      : tableData.length}
-                  </Label>
-                }
-              />
-            ))}
-          </Tabs>
-
-          <OrderTableToolbar
-            filters={filters}
-            onFilters={handleFilters}
-            //
-            dateError={dateError}
-          />
-
-          {canReset && (
-            <OrderTableFiltersResult
-              filters={filters}
-              onFilters={handleFilters}
-              //
-              onResetFilters={handleResetFilters}
-              //
-              results={dataFiltered.length}
-              sx={{ p: 2.5, pt: 0 }}
-            />
-          )}
-
-          <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
-            <TableSelectedAction
-              dense={table.dense}
-              numSelected={table.selected.length}
-              rowCount={dataFiltered.length}
-              onSelectAllRows={(checked) =>
-                table.onSelectAllRows(
-                  checked,
-                  dataFiltered.map((row) => row.id)
-                )
-              }
-              action={
-                <Tooltip title="Delete">
-                  <IconButton color="primary" onClick={confirm.onTrue}>
-                    <Iconify icon="solar:trash-bin-trash-bold" />
-                  </IconButton>
-                </Tooltip>
-              }
-            />
-
-            <Scrollbar>
-              <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
-                <TableHeadCustom
-                  order={table.order}
-                  orderBy={table.orderBy}
-                  headLabel={TABLE_HEAD}
-                  rowCount={dataFiltered.length}
-                  numSelected={table.selected.length}
-                  onSort={table.onSort}
-                  onSelectAllRows={(checked) =>
-                    table.onSelectAllRows(
-                      checked,
-                      dataFiltered.map((row) => row.id)
-                    )
-                  }
-                />
-
-                <TableBody>
-                  {dataFiltered
-                    .slice(
-                      table.page * table.rowsPerPage,
-                      table.page * table.rowsPerPage + table.rowsPerPage
-                    )
-                    .map((row) => (
-                      <OrderTableRow
-                        key={row.id}
-                        row={row}
-                        selected={table.selected.includes(row.id)}
-                        onSelectRow={() => table.onSelectRow(row.id)}
-                        onDeleteRow={() => handleDeleteRow(row.id)}
-                        onViewRow={() => handleViewRow(row.id)}
-                      />
-                    ))}
-
-                  <TableEmptyRows
-                    height={denseHeight}
-                    emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}
-                  />
-
-                  <TableNoData notFound={notFound} />
-                </TableBody>
-              </Table>
-            </Scrollbar>
-          </TableContainer>
-
-          <TablePaginationCustom
-            count={dataFiltered.length}
-            page={table.page}
-            rowsPerPage={table.rowsPerPage}
-            onPageChange={table.onChangePage}
-            onRowsPerPageChange={table.onChangeRowsPerPage}
-            //
-            dense={table.dense}
-            onChangeDense={table.onChangeDense}
-          />
-        </Card>
-      </Container>
-
-      <ConfirmDialog
-        open={confirm.value}
-        onClose={confirm.onFalse}
-        title="Delete"
-        content={
-          <>
-            Are you sure want to delete <strong> {table.selected.length} </strong> items?
-          </>
-        }
-        action={
-          <Button
-            variant="contained"
-            color="error"
-            onClick={() => {
-              handleDeleteRows();
-              confirm.onFalse();
-            }}
-          >
-            Delete
-          </Button>
-        }
-      />
-    </>
-  );
-}
-
-// ----------------------------------------------------------------------
-
-function applyFilter({
-  inputData,
-  comparator,
-  filters,
-  dateError,
-}: {
-  inputData: IOrderItem[];
-  comparator: (a: any, b: any) => number;
-  filters: IOrderTableFilters;
-  dateError: boolean;
-}) {
-  const { status, name, startDate, endDate } = filters;
-
-  const stabilizedThis = inputData.map((el, index) => [el, index] as const);
-
-  stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0]);
-    if (order !== 0) return order;
-    return a[1] - b[1];
-  });
-
-  inputData = stabilizedThis.map((el) => el[0]);
-
-  if (name) {
-    inputData = inputData.filter(
-      (order) =>
-        order.orderNumber.toLowerCase().indexOf(name.toLowerCase()) !== -1 ||
-        order.customer.name.toLowerCase().indexOf(name.toLowerCase()) !== -1 ||
-        order.customer.email.toLowerCase().indexOf(name.toLowerCase()) !== -1
+  if (loading) {
+    return (
+      <Box sx={{ width: '100%', mt: 3 }}>
+        <LinearProgress />
+      </Box>
     );
   }
 
-  if (status !== 'all') {
-    inputData = inputData.filter((order) => order.status === status);
+  if (error) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Typography color="error">{error}</Typography>
+      </Box>
+    );
   }
 
-  if (!dateError) {
-    if (startDate && endDate) {
-      inputData = inputData.filter((order) => isBetween(order.createdAt, startDate, endDate));
-    }
-  }
+  return (
+    <>
+      <Card>
+        <CardHeader
+          title="All Posts"
+          sx={{
+            mb: 3,
+            '& .MuiCardHeader-action': { m: 0 },
+          }}
+        />
 
-  return inputData;
+        <TableContainer sx={{ overflow: 'unset' }}>
+          <Scrollbar>
+            <Table sx={{ minWidth: 960 }}>
+              <TableHeadCustom headLabel={TABLE_HEAD} />
+
+              <TableBody>
+                {posts.map((post) => (
+                  <TableRow key={post._id}>
+                    <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
+                      <Avatar
+                        alt={post.title}
+                        src={post.images[0]?.imageUrl}
+                        variant="rounded"
+                        sx={{ width: 48, height: 48, mr: 2 }}
+                      />
+                      <Typography variant="subtitle2" noWrap>
+                        {post.title}
+                      </Typography>
+                    </TableCell>
+
+                    <TableCell>{post.brand}</TableCell>
+
+                    <TableCell align="right">{post.price}</TableCell>
+
+                    <TableCell>
+                      <Label
+                        variant={theme.palette.mode === 'light' ? 'soft' : 'filled'}
+                        color={post.condition === 'New' ? 'success' : 'warning'}
+                      >
+                        {post.condition}
+                      </Label>
+                    </TableCell>
+
+                    <TableCell>
+                      <Label
+                        variant={theme.palette.mode === 'light' ? 'soft' : 'filled'}
+                        color={post.verify ? 'success' : 'error'}
+                      >
+                        {post.verify ? 'Verified' : 'Pending'}
+                      </Label>
+                    </TableCell>
+
+                    <TableCell>{fDateTime(post.createdAt)}</TableCell>
+
+                    <TableCell align="right">
+                      <Stack direction="row" spacing={1} justifyContent="flex-end">
+                        {post.tags.map((tag) => (
+                          <Chip key={tag} label={tag} size="small" />
+                        ))}
+                        <Tooltip title="View Details">
+                          <IconButton onClick={() => handleViewPost(post)}>
+                            <Iconify icon="solar:eye-bold" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Edit">
+                          <IconButton>
+                            <Iconify icon="solar:pen-bold" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Delete">
+                          <IconButton color="error">
+                            <Iconify icon="solar:trash-bin-trash-bold" />
+                          </IconButton>
+                        </Tooltip>
+                      </Stack>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Scrollbar>
+        </TableContainer>
+      </Card>
+
+      <PostDetailsDialog
+        post={selectedPost}
+        open={openDialog}
+        onClose={handleCloseDialog}
+        onVerificationSuccess={handleVerificationSuccess}
+      />
+    </>
+  );
 }

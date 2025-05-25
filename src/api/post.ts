@@ -6,8 +6,45 @@ import axios, { fetcher, endpoints } from 'src/utils/axios';
 import { HOST_API } from 'src/config-global';
 import { IPostItem } from 'src/types/blog';
 
+// Types
+export type PostImage = {
+  imageUrl: string;
+  _id: string;
+};
 
+export type Post = {
+  _id: string;
+  userId: string;
+  brand: string;
+  yearOfManufacture: string;
+  mileage: string;
+  engineCapacity: string;
+  fuelType: string[];
+  transmission: string[];
+  bodyType: string;
+  category: string[];
+  images: PostImage[];
+  negotiable: boolean;
+  description: string;
+  title: string;
+  city: string;
+  mobileNumber: string;
+  whatsappNumber: string;
+  price: string;
+  socialIcon: string[];
+  verify: boolean;
+  condition: string;
+  tags: string[];
+  postId: string;
+  createdAt: string;
+  updatedAt: string;
+};
 
+export type PostsResponse = {
+  success: boolean;
+  message: string;
+  data: Post[];
+};
 
 export function useGetLatestPosts(title: string) {
     const URL = title ? [endpoints.post.latest, { params: { title } }] : '';
@@ -143,5 +180,15 @@ export function useGetLatestPosts(title: string) {
         success: false,
         error: error.response?.data?.message || error.message,
       };
+    }
+  }
+
+  export async function getAllPosts() {
+    try {
+      const response = await axios.get<PostsResponse>(`${HOST_API}/api/getAllPosts`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+      throw error;
     }
   }

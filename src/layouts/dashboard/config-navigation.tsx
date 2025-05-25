@@ -78,7 +78,7 @@ export function useNavData() {
           //   icon: ICONS.banking,
           // },
           {
-            title: t('booking'),
+            title: t('your analytics'),
             path: paths.dashboard.general.booking,
             icon: ICONS.booking,
           },
