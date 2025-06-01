@@ -2,7 +2,7 @@ import axios from 'src/utils/axios';
 
 export async function sendChatMessage(question: string) {
   try {
-    const response = await axios.post('https://langgraphfanbdgetdemo-production.up.railway.app/ask', {
+    const response = await axios.post('https://agenticaiquickads-production.up.railway.app/ask', {
       question,
     });
 
