@@ -1,9 +1,7 @@
 import Box from '@mui/material/Box';
-
-import { usePathname } from 'src/routes/hooks';
 import ChatBot from 'src/components/chat/chat-bot';
-import Footer from './footer';
 import Header from './header';
+import Footer from './footer';
 
 
 // ----------------------------------------------------------------------
@@ -13,10 +11,6 @@ type Props = {
 };
 
 export default function MainLayout({ children }: Props) {
-  const pathname = usePathname();
-
-  const homePage = pathname === '/';
-
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: 1 }}>
       <Header />
@@ -25,17 +19,16 @@ export default function MainLayout({ children }: Props) {
         component="main"
         sx={{
           flexGrow: 1,
-          ...(!homePage && {
-            pt: { xs: 8, md: 10 },
-          }),
+          minHeight: 1,
+          py: { xs: 8, md: 10 },
         }}
       >
         {children}
       </Box>
 
       <Footer />
-
+      
       <ChatBot />
     </Box>
   );
-}
+} 

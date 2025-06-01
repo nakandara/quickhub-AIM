@@ -2,14 +2,16 @@ import Box from '@mui/material/Box';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useResponsive } from 'src/hooks/use-responsive';
-
+import ChatBot from 'src/components/chat/chat-bot';
 import { useSettingsContext } from 'src/components/settings';
+
 
 import Main from './main';
 import Header from './header';
 import NavMini from './nav-mini';
 import NavVertical from './nav-vertical';
 import NavHorizontal from './nav-horizontal';
+
 
 // ----------------------------------------------------------------------
 
@@ -42,6 +44,8 @@ export default function DashboardLayout({ children }: Props) {
         {lgUp ? renderHorizontal : renderNavVertical}
 
         <Main>{children}</Main>
+
+        <ChatBot />
       </>
     );
   }
@@ -62,6 +66,8 @@ export default function DashboardLayout({ children }: Props) {
 
           <Main>{children}</Main>
         </Box>
+
+        <ChatBot />
       </>
     );
   }
@@ -81,6 +87,8 @@ export default function DashboardLayout({ children }: Props) {
 
         <Main>{children}</Main>
       </Box>
+
+      <ChatBot />
     </>
   );
 }
