@@ -76,11 +76,22 @@ export default function TourListView() {
   // Directly use userPosts instead of userPostsData
   const dataSource = currentPath === 'yourAdvertisement' ? userPosts : verifiedPosts;
 
+  const handleSearch = useCallback(
+    (inputValue: string) => {
+      setSearch((prevState) => ({
+        ...prevState,
+        query: inputValue,
+      }));
+    },
+    []
+  );
+
   const dataFiltered = applyFilter({
     inputData: dataSource,
     filters,
     sortBy,
     dateError,
+    searchQuery: search.query,
   });
 
   const canReset =
@@ -89,7 +100,7 @@ export default function TourListView() {
     !!filters.services.length ||
     (!!filters.startDate && !!filters.endDate);
 
-  const notFound = !dataFiltered.length && canReset;
+  const notFound = !dataFiltered.length && (canReset || !!search.query);
 
   const handleFilters = useCallback((name: string, value: any) => {
     setFilters((prevState) => ({
@@ -105,27 +116,6 @@ export default function TourListView() {
   const handleSortBy = useCallback((newValue: string) => {
     setSortBy(newValue);
   }, []);
-
-  const handleSearch = useCallback(
-    (inputValue: string) => {
-      setSearch((prevState) => ({
-        ...prevState,
-        query: inputValue,
-      }));
-
-      if (inputValue) {
-        const results = dataSource.filter((tour:any) =>
-          tour.model?.toLowerCase().includes(inputValue.toLowerCase())
-        );
-
-        setSearch((prevState) => ({
-          ...prevState,
-          results,
-        }));
-      }
-    },
-    [dataSource]
-  );
 
   useEffect(() => {
     const isOtpPage = location.pathname.includes('otp');
@@ -231,11 +221,13 @@ const applyFilter = ({
   filters,
   sortBy,
   dateError,
+  searchQuery,
 }: {
   inputData: any[];
   filters: ITourFilters;
   sortBy: string;
   dateError: boolean;
+  searchQuery: string;
 }) => {
   // Return empty array if no input data
   if (!inputData || inputData.length === 0) return [];
@@ -244,6 +236,23 @@ const applyFilter = ({
   const tourGuideIds = tourGuides.map((tourGuide) => tourGuide.id);
 
   let filteredData = [...inputData];
+
+  // Apply search filter
+  if (searchQuery) {
+    filteredData = filteredData.filter((item) => {
+      const searchFields = [
+        item.model,
+        item.brand,
+        item.description,
+        item.location,
+        item.price?.toString(),
+      ].filter(Boolean);
+
+      return searchFields.some(
+        (field) => field.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    });
+  }
 
   // SORT BY
   if (sortBy === 'latest') {

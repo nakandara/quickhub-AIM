@@ -39,7 +39,7 @@ export default function HomeCleanInterfaces() {
                 : `4px 4px 16px ${alpha(theme.palette.grey[800], 0.48)}`,
           }}
         >
-          Beautiful, modern and clean user interfaces
+       QuickAdsHub – Sleek Interface for Buying, Selling Vehicles and Properties
         </Typography>
       </m.div>
     </Stack>
@@ -60,11 +60,11 @@ export default function HomeCleanInterfaces() {
             ...(index === 9 && { position: 'relative', zIndex: 9 }),
           }}
         >
-          <Image
+          {/* <Image
             disabledEffect
             alt={`clean-${index + 1}`}
             src={`/assets/images/home/clean/page_${index + 1}.webp`}
-          />
+          /> */}
         </Box>
       ))}
     </Box>
@@ -77,8 +77,8 @@ export default function HomeCleanInterfaces() {
         py: { xs: 10, md: 15 },
       }}
     >
-      {renderDescription}
-      {renderContent}
+      {/* {renderDescription}
+      {renderContent} */}
     </Container>
   );
 }

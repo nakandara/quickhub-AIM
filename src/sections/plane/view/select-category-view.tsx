@@ -67,16 +67,7 @@ export default function SelectCategoryView() {
           { name: 'User', href: paths.dashboard.user.root },
           { name: 'Plane' },
         ]}
-        action={
-          <Button
-            component={RouterLink}
-            href={paths.dashboard.user.new}
-            variant="contained"
-            startIcon={<Iconify icon="mingcute:add-line" />}
-          >
-            New User
-          </Button>
-        }
+     
         sx={{ mb: { xs: 3, md: 5 } }}
       />
 
