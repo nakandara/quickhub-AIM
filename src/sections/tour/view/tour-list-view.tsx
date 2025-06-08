@@ -98,7 +98,8 @@ export default function TourListView() {
     !!filters.destination.length ||
     !!filters.tourGuides.length ||
     !!filters.services.length ||
-    (!!filters.startDate && !!filters.endDate);
+    (!!filters.startDate && !!filters.endDate) ||
+    !!search.query;
 
   const notFound = !dataFiltered.length && (canReset || !!search.query);
 
@@ -111,6 +112,7 @@ export default function TourListView() {
 
   const handleResetFilters = useCallback(() => {
     setFilters(defaultFilters);
+    setSearch({ query: '', results: [] });
   }, []);
 
   const handleSortBy = useCallback((newValue: string) => {
@@ -143,7 +145,7 @@ export default function TourListView() {
     >
       <TourSearch
         query={search.query}
-        results={search.results}
+        results={[]}
         onSearch={handleSearch}
         hrefItem={(id: string) => paths.dashboard.tour.details(id)}
       />
